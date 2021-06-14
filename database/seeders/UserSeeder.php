@@ -16,9 +16,10 @@ class UserSeeder extends Seeder
     public function run()
     {
         User::create([
-            'name' => 'Watame',
             'email' => '123qwe@gmail.com',
             'password' => Hash::make('123qwe'),
+            'refresh_token' => 'rqqD9RoMxdIy8E1nBkDnv2Zw8wqiGEvu',
+            'is_admin' => true,
         ]);
     }
 }

@@ -5,7 +5,8 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Http\Exceptions\HttpResponseException;
-
+use App\Models\User;
+use Exception;
 
 class JWTAuth
 {
@@ -18,14 +19,18 @@ class JWTAuth
      */
     public function handle(Request $request, Closure $next)
     {
-        $payload = auth()->payload();
-        $payloadArray = $payload->toArray();
+        try {
+            $refreshToken = $request->cookie('refresh_token');
+            $user = User::where('refresh_token', $refreshToken)->first();
+            if ($user === null) {
+                throw new Exception('無效驗證');
+            }
 
-        if (time() <= $payloadArray['iat'] + 3600) {
+            auth()->payload();
             return $next($request);
         }
-
-        $errorResponseData = ["message" => "Auth 警告: 沒有權限使用API"];
-        throw new HttpResponseException(response()->json($errorResponseData, 422));
+        catch (Exception $e) {
+            return response()->json(["message" => $e->getMessage()], 401);
+        }
     }
 }

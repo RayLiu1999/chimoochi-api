@@ -22,10 +22,10 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 Route::group(['prefix' => 'auth'], function () {
     Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth.jwt');
-    Route::post('/refresh_token', [AuthController::class, 'refresh_token'])->middleware('auth.jwt');
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('/refresh_token', [AuthController::class, 'refresh_token']);
     Route::post('/register', [AuthController::class, 'register']);
-    Route::get('/user-profile', [AuthController::class, 'userProfile']);
+    Route::get('/user', [AuthController::class, 'user'])->middleware('auth.jwt');
 });
 
 

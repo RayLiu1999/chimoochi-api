@@ -15,29 +15,33 @@ class CategorySeeder extends Seeder
     public function run()
     {
         Category::create([
+            'id' => 1,
             'name' => '木椅',
         ]);
 
         Category::create([
+            'id' => 2,
             'name' => '塑膠椅',
         ]);
 
         Category::create([
+            'id' => 3,
             'name' => '沙發',
         ]);
 
         Category::create([
-            'name' => '特別推薦',
+            'id' => 4,
+            'name' => '金屬椅',
         ]);
 
         Category::create([
+            'id' => 5,
             'name' => '經典設計',
         ]);
 
         Category::create([
-            'name' => '木椅',
+            'id' => 6,
+            'name' => '特別推薦',
         ]);
-
-
     }
 }

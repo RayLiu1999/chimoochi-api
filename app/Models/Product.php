@@ -13,10 +13,16 @@ class Product extends Model
         'name',
         'category_id',
         'image_url',
+        'desc',
         'origin_price',
         'price',
         'unit',
         'is_enabled',
-        'num'
+        'quantity'
     ];
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
 }

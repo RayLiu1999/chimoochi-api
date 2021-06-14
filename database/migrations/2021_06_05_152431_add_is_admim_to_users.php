@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddRefreshTokenToUsers extends Migration
+class AddIsAdmimToUsers extends Migration
 {
     /**
      * Run the migrations.
@@ -14,7 +14,7 @@ class AddRefreshTokenToUsers extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('refresh_token');
+            $table->boolean('is_admin');
         });
     }
 
@@ -26,7 +26,7 @@ class AddRefreshTokenToUsers extends Migration
     public function down()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('refresh_token');
+            $table->dropColumn('is_admin');
         });
     }
 }
