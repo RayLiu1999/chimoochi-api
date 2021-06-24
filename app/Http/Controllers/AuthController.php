@@ -59,10 +59,9 @@ class AuthController extends Controller
     }
 
 
-    public function logout(Request $request)
+    public function logout(Request $request, User $user)
     {
-        $refreshToken = $request->cookie('refresh_token');
-        $user = User::where('refresh_token' , $refreshToken)->first();
+        $user = $user->getUserFromRT($request);
 
         if ($user) {
             if (auth()->user()) {
@@ -75,10 +74,9 @@ class AuthController extends Controller
     }
 
 
-    public function refresh_token(Request $request)
+    public function refresh_token(Request $request, User $user)
     {
-        $refreshToken = $request->cookie('refresh_token');
-        $user = User::where('refresh_token' , $refreshToken)->first();
+        $user = $user->getUserFromRT($request);
     
         if ($user) {
             $newRefreshToken = $this->randomRefreshToken();
@@ -113,9 +111,11 @@ class AuthController extends Controller
     {
         return response()->json([
             'success' => true,
-            'authToken' => $authToken,
-            'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 60,
+            'data' => [
+                'authToken' => $authToken,
+                'token_type' => 'bearer',
+                'expires_in' => auth()->factory()->getTTL() * 60,
+            ]
         ])
         ->cookie('refresh_token', $newRefreshToken, 60 * 24);
     }

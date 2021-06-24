@@ -26,7 +26,7 @@ class ProductResource extends JsonResource
             'origin_price' => $this->origin_price,
             'price' => $this->price,
             'unit' => $this->unit,
-            'is_enabled' => $this->is_enabled,
+            'enabled' => $this->enabled,
             'quantity' => $this->quantity
         ];
     }

@@ -2,30 +2,40 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\CartItemResource;
 use App\Http\Resources\ProductResource;
 use App\Models\CartItem;
 use Illuminate\Http\Request;
+use App\Models\Product;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 class CartController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth.jwt', ['only' => ['index']]);
-    }
-
-    public function index(Request $request)
+    public function index(Request $request, User $user)  // 每次的請求，前端都要把jwt換掉`
     {
         $cartItemsAry = [];
-        $user = auth()->user();
+        $productIds = [];
+        $total = 0;
+
+        $user = $user->getUserFromRT($request);
 
         if ($user) {
+            if (auth()->user() === null) {
+                return response()->json(['success' => false, 'message' => 'auth token失效']);
+            }
+
             $cartItems = $user->getCartOrCreate()->cartItems;
             foreach ($cartItems as $cartItem) {
-                array_push($cartItemsAry, $cartItem);
+                array_push($productIds, $cartItem->product_id);
             }
-    
-            return response()->json(['success' => true, 'message' => $cartItemsAry]);
+
+            $cartProducts = CartItemResource::collection($cartItems->whereIn('product_id', $productIds));
+            foreach ($cartProducts as $cartProduct) {
+                $total += (($cartProduct->quantity) * ($cartProduct->product->price));
+            }
+
+            return response()->json(['success' => true, 'data' => ['carts' => $cartProducts, 'total' => $total]]);
         } else {
             $cookieCart = $this->getCartFromCookie($request);
             foreach ($cookieCart as $productIds => $quantity) {
@@ -43,12 +53,16 @@ class CartController extends Controller
     }
 
 
-    public function addToCart(Request $request, $id)
+    public function addToCart(Request $request, User $user, $id)
     {   
-        $user = auth()->user();
+        $user = $user->getUserFromRT($request);
         $quantity = $request->input('quantity');
 
         if ($user) {
+            if (auth()->user() === null) {
+                return response()->json(['success' => false, 'message' => 'auth token失效']);
+            }
+
             $productId = $id;
             $jsonCart = $request->cookie('cart');
             $cookieCart = (!is_null($jsonCart)) ? json_decode($jsonCart) : [];
@@ -79,11 +93,15 @@ class CartController extends Controller
         }
     }
 
-    public function deleteCartItem(Request $request, $id)
+    public function deleteCartItem(Request $request, User $user, $id)
     {
-        $user = auth()->user();
+        $user = $user->getUserFromRT($request);
 
         if ($user) {
+            if (auth()->user() === null) {
+                return response()->json(['success' => false, 'message' => 'auth token失效']);
+            }
+
             $productId = $id;
             $cartItem = $user->getCartOrCreate()->cartItems()->where('product_id', $productId)->first();
             if ($cartItem) {
@@ -101,12 +119,16 @@ class CartController extends Controller
         return response()->json(['success' => false, 'message' => '刪除失敗'], 400);
     }
 
-    public function updateCartItem(Request $request, $id)
+    public function updateCartItem(Request $request, User $user, $id)
     {
-        $user = auth()->user();
+        $user = $user->getUserFromRT($request);
         $quantity = $request->input('quantity');    
         
         if ($user) {
+            if (auth()->user() === null) {
+                return response()->json(['success' => false, 'message' => 'auth token失效']);
+            }
+
             $productId = $id;
             $cartItem = $user->cart->cartItems()->where('product_id', $productId)->first();
             dd($cartItem);

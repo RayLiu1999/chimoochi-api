@@ -39,6 +39,13 @@ class User extends Authenticatable implements JWTSubject
         return $cart;
     }
 
+    public function getUserFromRT($request)
+    {
+        $refreshToken = $request->cookie('refresh_token');
+        $user = $this->where('refresh_token' , $refreshToken)->first();
+        return $user;
+    }
+
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.
      *

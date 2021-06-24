@@ -20,8 +20,9 @@ class ProductController extends Controller
     public function index()
     {
         return response()->json([
-            'success' => true, 'message' => 'success',
-            'products' => ProductResource::collection(Product::all())
+            'success' => true, 'data' => [
+            'products' => ProductResource::collection(Product::all()),
+            ],
         ]);
     }
 
@@ -67,8 +68,9 @@ class ProductController extends Controller
     public function show(Product $product)
     {
         return response()->json([
-            'success' => true, 'message' => 'success',
-            'products' => new ProductResource($product)
+            'success' => true, 'data' => [
+            'product' => new ProductResource($product),
+            ],
         ]);
     }
 
