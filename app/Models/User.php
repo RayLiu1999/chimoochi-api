@@ -18,11 +18,26 @@ class User extends Authenticatable implements JWTSubject
      * @var array
      */
     protected $fillable = [
-        'name',
         'email',
         'password',
+        'refresh_token'
     ];
 
+    public function cart()
+    {
+        return $this->hasOne(Cart::class);
+    }
+
+    public function getCartOrCreate()
+    {
+        $cart = $this->cart;
+        if (!$cart) {
+            $cart = Cart::create([
+                'user_id' => $this->id
+            ]);            
+        }
+        return $cart;
+    }
 
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.

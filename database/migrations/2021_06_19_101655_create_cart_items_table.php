@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddIsAdmimToUsers extends Migration
+class CreateCartItemsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,12 @@ class AddIsAdmimToUsers extends Migration
      */
     public function up()
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->boolean('is_admin')->default(false);
+        Schema::create('cart_items', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('product_id');
+            $table->integer('quantity');
+            $table->foreignId('cart_id');
+            $table->timestamps();
         });
     }
 
@@ -25,8 +29,6 @@ class AddIsAdmimToUsers extends Migration
      */
     public function down()
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('is_admin');
-        });
+        Schema::dropIfExists('cart_items');
     }
 }

@@ -20,17 +20,16 @@ class JWTAuth
     public function handle(Request $request, Closure $next)
     {
         try {
-            $refreshToken = $request->cookie('refresh_token');
-            $user = User::where('refresh_token', $refreshToken)->first();
-            if ($user === null) {
-                throw new Exception('無效驗證');
-            }
-
-            auth()->payload();
+            // $refreshToken = $request->cookie('refresh_token');
+            // $user = User::where('refresh_token', $refreshToken)->first();
+            // if ($user === null) {
+            //     throw new Exception('無效驗證');
+            // }
+            $user = auth()->payload();  // 錯誤訊息在 \vender\tymon\jwt-auth\src
             return $next($request);
         }
         catch (Exception $e) {
-            return response()->json(["message" => $e->getMessage()], 401);
+            return response()->json(["success" => false, "message" => $e->getMessage()], 401);
         }
     }
 }

@@ -10,42 +10,27 @@ use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index() // 商品呈現記得不用權限
+    public $validator;
+
+    public function __construct()
+    {
+        $this->middleware('auth.jwt', ['except' => ['index', 'show']]);
+    }
+
+    public function index()
     {
         return response()->json([
-            'message' => 'success',
+            'success' => true, 'message' => 'success',
             'products' => ProductResource::collection(Product::all())
         ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => ['required', 'string', 'max:20'],
-            'category' => ['required', 'string'],
-            'image_url' => ['string', 'max:255', 'min:10'],
-            'image' => ['file', 'image'],
-            'desc' => ['required', 'string', 'max:450'],
-            'origin_price' => ['required', 'integer'],
-            'price' => ['required', 'integer'],
-            'unit' => ['required', 'string'],
-            'is_enabled' => ['required', 'boolean'],
-            'quantity' => ['required', 'integer'],
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['message' => '格式錯誤'], 422);
+        $this->check($request);
+        
+        if ($this->validator->fails()) {
+            return response()->json(['success' => false, 'message' => '格式錯誤'], 422);
         };
 
         if ($request->hasFile('image')) {
@@ -72,48 +57,79 @@ class ProductController extends Controller
             'origin_price' => $request->input('origin_price'),
             'price' => $request->input('price'),
             'unit' => $request->input('unit'),
-            'is_enabled' => $request->boolean('is_enabled'),
+            'enabled' => $request->boolean('enabled'),
             'quantity' => $request->input('quantity'),
         ]);
 
-        return response()->json(['message' => '商品建立成功']);
+        return response()->json(['success' => true, 'message' => '商品建立成功']);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)  // 要過濾products傳過來的資料(注意category_id)
+    public function show(Product $product)
     {
         return response()->json([
-            'message' => 'success',
-            'products' => new ProductResource(Product::find($id))
+            'success' => true, 'message' => 'success',
+            'products' => new ProductResource($product)
         ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
+    public function update(Product $product, Request $request)
     {
-        $products = $request->all();
-        Product::where();
+        $this->check($request);
+        
+        if ($this->validator->fails()) {
+            return response()->json(['success' => false, 'message' => '格式錯誤'], 422);
+        };
+
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $path = $request->file('image')->storeAs(
+                'uploads/images',
+                $file->getClientOriginalName(),
+                'public'
+            );
+        };
+
+        $category_name = $request->input('category');
+        $category = Category::where('name', $category_name)->first();
+
+        $product->update([
+            'name' => $request->input('name'),
+            'category_id' => $category->id,
+            'image_url' => $request->input('image_url') ?? asset('storage/' . $path),
+            'desc' => $request->input('desc'),
+            'origin_price' => $request->input('origin_price'),
+            'price' => $request->input('price'),
+            'unit' => $request->input('unit'),
+            'enabled' => $request->boolean('enabled'),
+            'quantity' => $request->input('quantity'),
+        ]);
+
+        return response()->json(['success' => true, 'message' => '商品更新成功']);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
+    public function destroy(Product $product)
     {
-        
+        if ($product->delete()) {
+            return response()->json(['success' => true, 'message' => '商品刪除成功']);
+        }
+
+        return response()->json(['success' => false, 'message' => '錯誤'], 403);
+    }
+
+    public function check($request)
+    {
+        $this->validator = Validator::make($request->all(), [
+            'name' => ['required', 'string', 'max:20'],
+            'category' => ['required', 'string'],
+            'image_url' => ['string', 'max:255', 'min:10'],
+            'image' => ['file', 'image'],
+            'desc' => ['required', 'string', 'max:450'],
+            'origin_price' => ['required', 'integer'],
+            'price' => ['required', 'integer'],
+            'unit' => ['required', 'string'],
+            'enabled' => ['boolean'],
+            'quantity' => ['required', 'integer'],
+        ]);
+
     }
 }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -25,8 +26,15 @@ Route::group(['prefix' => 'auth'], function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/refresh_token', [AuthController::class, 'refresh_token']);
     Route::post('/register', [AuthController::class, 'register']);
-    Route::get('/user', [AuthController::class, 'user'])->middleware('auth.jwt');
 });
 
+Route::resource('products',ProductController::class)->except(['create', 'edit']);
 
-Route::resource('products', ProductController::class);
+Route::group(['prefix' => 'cart'], function () {
+    Route::get('/', [CartController::class, 'index']);
+    Route::post('/addToCart/{id}', [CartController::class, 'addToCart']);
+    Route::delete('/deleteCartItem/{id}', [CartController::class, 'deleteCartItem']);
+    Route::patch('/updateCartItem/{id}', [CartController::class, 'updateCartItem']);
+});
+
+// Route::post('/order', [OrderController::class, 'addToOrder']);
