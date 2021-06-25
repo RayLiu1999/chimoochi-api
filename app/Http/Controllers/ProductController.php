@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
 {
-    public $validator;
+    private $validator;
 
     public function __construct()
     {
@@ -20,8 +20,9 @@ class ProductController extends Controller
     public function index()
     {
         return response()->json([
-            'success' => true, 'data' => [
-            'products' => ProductResource::collection(Product::all()),
+            'success' => true, 
+            'data' => [
+                'products' => ProductResource::collection(Product::all()),
             ],
         ]);
     }
@@ -68,8 +69,9 @@ class ProductController extends Controller
     public function show(Product $product)
     {
         return response()->json([
-            'success' => true, 'data' => [
-            'product' => new ProductResource($product),
+            'success' => true, 
+            'data' => [
+                'product' => new ProductResource($product),
             ],
         ]);
     }
