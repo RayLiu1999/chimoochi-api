@@ -12,11 +12,11 @@ class AuthController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'email' => ['required', 'email'],
-            'password' => ['required', 'string', 'min:6'],
+            'password' => ['required', 'min:6'],
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['success' => false, 'message' => '帳號或密碼格式錯誤'], 422);
+            return response()->json(['success' => false, 'message' => '帳號或密碼格式錯誤'], 400);
         }
 
         if (!$authToken = auth()->attempt($validator->validated())) {
@@ -40,7 +40,7 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['success' => false, 'message' => '帳號或密碼格式錯誤'], 422);
+            return response()->json(['success' => false, 'message' => '帳號或密碼格式錯誤'], 400);
         }
 
         $user = User::where('email', $request->email)->first();

@@ -32,7 +32,7 @@ class ProductController extends Controller
         $this->check($request);
         
         if ($this->validator->fails()) {
-            return response()->json(['success' => false, 'message' => '格式錯誤'], 422);
+            return response()->json(['success' => false, 'message' => '格式錯誤'], 400);
         };
 
         if ($request->hasFile('image')) {
@@ -81,7 +81,7 @@ class ProductController extends Controller
         $this->check($request);
         
         if ($this->validator->fails()) {
-            return response()->json(['success' => false, 'message' => '格式錯誤'], 422);
+            return response()->json(['success' => false, 'message' => '格式錯誤'], 400);
         };
 
         if ($request->hasFile('image')) {

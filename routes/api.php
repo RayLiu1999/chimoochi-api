@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -28,13 +29,19 @@ Route::group(['prefix' => 'auth'], function () {
     Route::post('/register', [AuthController::class, 'register']);
 });
 
-Route::resource('products',ProductController::class)->except(['create', 'edit']);
+Route::resource('products', ProductController::class)->except(['create', 'edit']);
 
 Route::group(['prefix' => 'cart'], function () {
     Route::get('/', [CartController::class, 'index']);
     Route::post('/addToCart/{id}', [CartController::class, 'addToCart']);
     Route::delete('/deleteCartItem/{id}', [CartController::class, 'deleteCartItem']);
     Route::patch('/updateCartItem/{id}', [CartController::class, 'updateCartItem']);
+    Route::post('/checkout', [CartController::class, 'checkout']);
 });
+
+Route::post('/test', [CartController::class, 'test']);
+
+Route::resource('orders', OrderController::class)->only(['index', 'store', 'update']);
+// Route::resource('coupons', CouponController::class)->except(['create', 'edit']);
 
 // Route::post('/order', [OrderController::class, 'addToOrder']);

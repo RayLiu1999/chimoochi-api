@@ -6,7 +6,10 @@ use Illuminate\Http\Request;
 use App\Http\Resources\CartItemResource;
 use App\Http\Resources\ProductResource;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 use App\Models\CartItem;
+use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\User;
 
@@ -16,51 +19,66 @@ class CartController extends Controller
 
     public function index(Request $request, User $user)  // 每次的請求，前端都要把jwt換掉`
     {
-        $user = $user->getUserFromRT($request);
+        $currentUser = $user->getUserFromRT($request);
 
-        if ($user) {
+        if ($currentUser) {
             if (!$this->authTokenVerify()){
                 return $this->errorResponse('auth token失效', 401);
             }
-            if (($DBcarts = $this->getDBCartItemsArray($user)) !== false) {
+            if (($DBcarts = $this->getDBCartItemsArray($currentUser)) !== false) {
                 $cartItemsAry = $DBcarts[0];
-                $total = $DBcarts[1];
+                $amount = $DBcarts[1];
                 return response()->json(['success' => true,
-                                         'data' => [
+                                        'data' => [
                                             'carts' => $cartItemsAry,
-                                            'total' => $total,
+                                            'amount' => $amount,
                                         ]]);
             } else {
                 return $this->errorResponse('購物車為空', 400);
             }
         } else {
-            if (($carts = $this->getCartProducts($request)) !== false) {
-                $cartItemsAry = $carts[0];
-                $total = $carts[1];
-                return response()->json(['success' => true,
-                                         'data' => [
-                                            'carts' => $cartItemsAry,
-                                            'total' => $total,
-                                            ]]);
-            } else {
-                return $this->errorResponse('購物車為空', 400);
-            }
+            // if (($carts = $this->getCartProducts($request)) !== false) {
+            //     $cartItemsAry = $carts[0];
+            //     $total = $carts[1];
+            //     return response()->json(['success' => true,
+            //                             'data' => [
+            //                                 'carts' => $cartItemsAry,
+            //                                 'total' => $total,
+            //                                 ]]);
+            // } else {
+            //     return $this->errorResponse('購物車為空', 400);
+            // }
         }
+    }
+
+    public function checkout(Request $request, User $user)
+    {
+        $currentUser = $user->getUserFromRT($request);
+        if ($currentUser) {
+            if (!$this->authTokenVerify()){
+                return $this->errorResponse('auth token失效', 401);
+            }
+            // $cartItems = $user->getCartOrCreate()->cartItems;
+            if ($this->createOrderByCart($request, $currentUser) === false){
+                return $this->errorResponse('格式錯誤', 400);
+            }
+            return response()->json(['success' => true, 'message' => '訂單建立成功']);
+        }
+        return $this->errorResponse('無效驗證', 401);
     }
 
     public function addToCart(Request $request, User $user, $id)
     {   
-        $user = $user->getUserFromRT($request);
+        $currentUser = $user->getUserFromRT($request);
         $quantity = $this->requestCheck($request);
-
         if ($this->validator->fails()) {
             return $this->errorResponse('格式錯誤', 400);
         }
-        if ($user) {
+        if ($currentUser) {
             if (!$this->authTokenVerify()){
                 return $this->errorResponse('auth token失效', 401);
             }
-            $this->addToDBCart($user, $id, $quantity);
+            $this->addToDBCart($currentUser, $id, $quantity);
             return response()->json(['success' => true, 'message' => '加入資料庫購物車成功'])
                             ->withCookie('cart');
         } else {
@@ -71,13 +89,13 @@ class CartController extends Controller
 
     public function deleteCartItem(Request $request, User $user, $id)
     {
-        $user = $user->getUserFromRT($request);
+        $currentUser = $user->getUserFromRT($request);
 
-        if ($user) {
+        if ($currentUser) {
             if (!$this->authTokenVerify()){
                 return $this->errorResponse('auth token失效', 401);
             }
-            if ($this->deleteDBCart($request, $user, $id)) {
+            if ($this->deleteDBCart($request, $currentUser, $id)) {
                 return response()->json(['success' => true, 'message' => '刪除資料庫購物車成功']);
             } else {
                 return $this->errorResponse('刪除失敗', 400);
@@ -93,18 +111,18 @@ class CartController extends Controller
 
     public function updateCartItem(Request $request, User $user, $id)
     {
-        $user = $user->getUserFromRT($request);
+        $currentUser = $user->getUserFromRT($request);
         $quantity = $this->requestCheck($request);
 
         if ($this->validator->fails()) {
             return $this->errorResponse('格式錯誤', 400);
         } 
         
-        if ($user) {
+        if ($currentUser) {
             if (!$this->authTokenVerify()){
                 return $this->errorResponse('auth token失效', 401);
             }
-            if ($this->updateToDBCart($user, $quantity, $id)) {
+            if ($this->updateToDBCart($currentUser, $quantity, $id)) {
                 return response()->json(['success' => true, 'message' => '更新資料庫購物車成功']);
             } else {
                 return $this->errorResponse('更新失敗', 400);
@@ -137,61 +155,67 @@ class CartController extends Controller
         return false;
     }
 
-    private function getDBCartItemsArray($user, $cartItemsAry = [], $productIdsAry = [], $total = 0)
+    private function getDBCartItemsArray($currentUser, $cartItemsAry = [], $productIdsAry = [], $amount = 0)
     {
-        $cartItems = $user->getCartOrCreate()->cartItems;
+        $cartItems = $currentUser->getCartOrCreate()->cartItems;
         foreach ($cartItems as $cartItem) {
             array_push($productIdsAry, $cartItem->product_id);
         }
         $cartItemsAry = CartItemResource::collection($cartItems->whereIn('product_id', $productIdsAry));
-
+        
         if (!$cartItemsAry) {
             return false;
         }
-
         foreach ($cartItemsAry as $cartItemAry) {
-            $total += (($cartItemAry->quantity) * ($cartItemAry->product->price));
+            $amount += (($cartItemAry->quantity) * ($cartItemAry->product->price));
         }
-        return array($cartItemsAry, $total);
+
+        return array($cartItemsAry, $amount);
     }
 
-    private function getCartProducts(Request $request, $cartItemsAry = [], $productIdsAry = [], $total = 0)
+    private function getEndPrice($currentUser, $amount = 0)
     {
-        $cookieCartsAry = [];
-        $i = 0;
-        $cookieCart = $this->getCartFromCookie($request);
-        
-        foreach ($cookieCart as $productIds => $quantity) {
-            $productId = explode('_', $productIds)[2];
-            array_push($productIdsAry, $productId);
-            $cookieCartsAry[$productId] = $quantity;
-        }
-
-        $cartProducts = ProductResource::collection(Product::find($productIdsAry));
-
-        if (!isset($cartProducts[0])) {
-            return false;
-        }
-
-        foreach ($cartProducts as $cartProduct) {
-            $cartItemsAry[$i]['product_id'] = $cartProduct->id;
-
-            foreach ($cookieCartsAry as $productId => $quantity) {
-                if ($productId === $cartProduct->id) {
-                    $cartItemsAry[$i]['quantity'] = intval($quantity);
-                    $total += $quantity * $cartProduct->price;
-                }
-            }
-            $cartItemsAry[$i]['product'] = $cartProduct;
-            $i += 1;
-        }
-        return array($cartItemsAry, $total);
+        $amount = ($this->getDBCartItemsArray($currentUser))[1];
+        return $amount;
     }
 
-    private function addToDBCart($user, $id, $quantity)
+    // private function getCartProducts(Request $request, $cartItemsAry = [], $productIdsAry = [], $total = 0)
+    // {
+    //     $cookieCartsAry = [];
+    //     $i = 0;
+    //     $cookieCart = $this->getCartFromCookie($request);
+        
+    //     foreach ($cookieCart as $productIds => $quantity) {
+    //         $productId = explode('_', $productIds)[2];
+    //         array_push($productIdsAry, $productId);
+    //         $cookieCartsAry[$productId] = $quantity;
+    //     }
+
+    //     $cartProducts = ProductResource::collection(Product::find($productIdsAry));
+
+    //     if (!isset($cartProducts[0])) {
+    //         return false;
+    //     }
+
+    //     foreach ($cartProducts as $cartProduct) {
+    //         $cartItemsAry[$i]['product_id'] = $cartProduct->id;
+
+    //         foreach ($cookieCartsAry as $productId => $quantity) {
+    //             if ($productId === $cartProduct->id) {
+    //                 $cartItemsAry[$i]['quantity'] = intval($quantity);
+    //                 $total += $quantity * $cartProduct->price;
+    //             }
+    //         }
+    //         $cartItemsAry[$i]['product'] = $cartProduct;
+    //         $i += 1;
+    //     }
+    //     return array($cartItemsAry, $total);
+    // }
+
+    private function addToDBCart($currentUser, $id, $quantity)
     {
         $productId = $id;
-        $cart = $user->getCartOrCreate();
+        $cart = $currentUser->getCartOrCreate();
         $cartItem = $cart->cartItems()->where('product_id', $id)->first();
         if ($cartItem) {
             $cartItem->quantity += $quantity;
@@ -218,10 +242,10 @@ class CartController extends Controller
         return $cookieCart;
     }
 
-    private function deleteDBCart(Request $request, $user, $id)
+    private function deleteDBCart(Request $request, $currentUser, $id)
     {
         $productId = $id;
-            $cartItem = $user->getCartOrCreate()->cartItems()->where('product_id', $productId)->first();
+            $cartItem = $currentUser->getCartOrCreate()->cartItems()->where('product_id', $productId)->first();
             if ($cartItem) {
                 $cartItem->delete();
                 return true;
@@ -241,10 +265,10 @@ class CartController extends Controller
         return false;
     }
 
-    private function updateToDBCart($user, $quantity, $id)
+    private function updateToDBCart($currentUser, $quantity, $id)
     {
         $productId = $id;
-        $cartItem = $user->cart->cartItems()->where('product_id', $productId)->first();
+        $cartItem = $currentUser->cart->cartItems()->where('product_id', $productId)->first();
         if ($cartItem) {
             $cartItem->update(['quantity' => $quantity]);
             return true;
@@ -279,5 +303,47 @@ class CartController extends Controller
     private function errorResponse($message, $status)
     {
         return response()->json(['success' => false, 'message' => $message], $status);
+    }
+
+    private function createOrderByCart(Request $request, $currentUser)
+    {
+        $cart = $currentUser->getCartOrCreate();
+
+        $amount = $this->getEndPrice($currentUser);
+
+        $validator = Validator::make($request->all(), [
+            'user.name' => ['required', 'string'],
+            'user.email' => ['required', 'email'],
+            'user.tel' => ['required', 'string', 'min:7'],
+            'user.address' => ['required', 'string'],
+            'message' => ['nullable', 'string'],
+        ]);
+
+        if ($validator->fails()) {
+            return false;
+        }
+        
+        DB::transaction(function () use ($request, $currentUser, $cart, $amount) {  
+            $order = Order::create([
+                'ship_name' => $request->input('user.name'),
+                'ship_email' => $request->input('user.email'),
+                'ship_phone' => $request->input('user.tel'),
+                'ship_address' => $request->input('user.address'),
+                'ship_message' => $request->input('message'),
+                'amount' => $amount,
+                'user_id' => $currentUser->id,
+            ]);
+
+            $order->orderItems()->saveMany($cart->cartItems->map(function($cartItem) {
+                return new OrderItem([
+                    'name' => $cartItem->product->name,
+                    'price' => $cartItem->product->price,
+                    'quantity' => $cartItem->quantity,
+                    'product_id' => $cartItem->product_id,
+                ]);
+            }));
+
+            $cart->cartItems()->delete();
+        });
     }
 }
