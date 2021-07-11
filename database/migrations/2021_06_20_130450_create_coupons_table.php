@@ -17,9 +17,9 @@ class CreateCouponsTable extends Migration
             $table->id();
             $table->string('name');
             $table->string('code');
-            $table->float('discount_present', 4, 3);
-            $table->boolean('enabled')->default(false);
-            $table->date('expired_at');
+            $table->integer('discount_present');
+            $table->boolean('is_enabled')->default(false);
+            $table->dateTime('expired_at');
             $table->timestamps();
         });
     }

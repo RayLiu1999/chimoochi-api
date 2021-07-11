@@ -4,11 +4,8 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Http\Exceptions\HttpResponseException;
-use App\Models\User;
-use Exception;
 
-class JWTAuth
+class IsAdmin
 {
     /**
      * Handle an incoming request.
@@ -19,12 +16,9 @@ class JWTAuth
      */
     public function handle(Request $request, Closure $next)
     {
-        try {
-            auth()->payload();  // 錯誤訊息在 \vender\tymon\jwt-auth\src
+        if ((auth()->user()->is_admin) === 1) {
             return $next($request);
         }
-        catch (Exception $e) {
-            return response()->json(["success" => false, "message" => $e->getMessage()], 401);
-        }
+        return response()->json(['success' => false, 'message' => '沒有權限'], 401);
     }
 }

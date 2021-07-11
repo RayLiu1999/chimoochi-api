@@ -4,13 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Http\Resources\CartItemResource;
-use App\Http\Resources\ProductResource;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
-use App\Models\CartItem;
 use App\Models\Order;
 use App\Models\OrderItem;
-use App\Models\Product;
+use App\Models\CartItem;
 use App\Models\User;
 
 class CartController extends Controller
@@ -51,22 +49,6 @@ class CartController extends Controller
         }
     }
 
-    public function checkout(Request $request, User $user)
-    {
-        $currentUser = $user->getUserFromRT($request);
-        if ($currentUser) {
-            if (!$this->authTokenVerify()){
-                return $this->errorResponse('auth token失效', 401);
-            }
-            // $cartItems = $user->getCartOrCreate()->cartItems;
-            if ($this->createOrderByCart($request, $currentUser) === false){
-                return $this->errorResponse('格式錯誤', 400);
-            }
-            return response()->json(['success' => true, 'message' => '訂單建立成功']);
-        }
-        return $this->errorResponse('無效驗證', 401);
-    }
-
     public function addToCart(Request $request, User $user, $id)
     {   
         $currentUser = $user->getUserFromRT($request);
@@ -85,6 +67,28 @@ class CartController extends Controller
             $cookieCart = $this->addToCookieCart($request, $id, $quantity);
             return $this->saveCookieCart($cookieCart, '加入購物車成功');
         }
+    }
+
+    public function checkout(Request $request, User $user)
+    {
+        $currentUser = $user->getUserFromRT($request);
+        if ($currentUser) {
+            if (!$this->authTokenVerify()){
+                return $this->errorResponse('auth token失效', 401);
+            }
+            $result = $this->createOrderByCart($request, $currentUser);
+            if ($result !== true) {
+                if ($result === '格式錯誤'){
+                    return $this->errorResponse('格式錯誤', 400);
+                }
+                if ($result === '訂單為空') {
+                    return $this->errorResponse('訂單為空', 400);
+                }
+            }
+
+            return response()->json(['success' => true, 'message' => '訂單建立成功']);
+        }
+        return $this->errorResponse('無效驗證', 401);
     }
 
     public function deleteCartItem(Request $request, User $user, $id)
@@ -155,8 +159,12 @@ class CartController extends Controller
         return false;
     }
 
-    private function getDBCartItemsArray($currentUser, $cartItemsAry = [], $productIdsAry = [], $amount = 0)
+    private function getDBCartItemsArray($currentUser)
     {
+        $cartItemsAry = [];
+        $productIdsAry = [];
+        $amount = 0;
+
         $cartItems = $currentUser->getCartOrCreate()->cartItems;
         foreach ($cartItems as $cartItem) {
             array_push($productIdsAry, $cartItem->product_id);
@@ -173,11 +181,6 @@ class CartController extends Controller
         return array($cartItemsAry, $amount);
     }
 
-    private function getEndPrice($currentUser, $amount = 0)
-    {
-        $amount = ($this->getDBCartItemsArray($currentUser))[1];
-        return $amount;
-    }
 
     // private function getCartProducts(Request $request, $cartItemsAry = [], $productIdsAry = [], $total = 0)
     // {
@@ -305,11 +308,21 @@ class CartController extends Controller
         return response()->json(['success' => false, 'message' => $message], $status);
     }
 
+    private function getEndPrice($currentUser)
+    {
+        $amount = $this->getDBCartItemsArray($currentUser)[1];
+
+        return $amount;
+    }
+
     private function createOrderByCart(Request $request, $currentUser)
     {
         $cart = $currentUser->getCartOrCreate();
-
         $amount = $this->getEndPrice($currentUser);
+        
+        if ($amount === 0) {
+            return '訂單為空';
+        }
 
         $validator = Validator::make($request->all(), [
             'user.name' => ['required', 'string'],
@@ -320,7 +333,7 @@ class CartController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return false;
+            return '格式錯誤';
         }
         
         DB::transaction(function () use ($request, $currentUser, $cart, $amount) {  
@@ -342,8 +355,10 @@ class CartController extends Controller
                     'product_id' => $cartItem->product_id,
                 ]);
             }));
-
+            
             $cart->cartItems()->delete();
         });
+        return true;
     }
+
 }

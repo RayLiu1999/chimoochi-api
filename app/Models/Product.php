@@ -13,11 +13,11 @@ class Product extends Model
         'name',
         'category_id',
         'image_url',
-        'desc',
+        'description',
         'origin_price',
         'price',
         'unit',
-        'enabled',
+        'is_enabled',
         'quantity'
     ];
 
