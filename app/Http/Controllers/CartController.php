@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Resources\CartItemResource;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\CartItem;
@@ -34,19 +35,8 @@ class CartController extends Controller
             } else {
                 return $this->errorResponse('購物車為空', 400);
             }
-        } else {
-            // if (($carts = $this->getCartProducts($request)) !== false) {
-            //     $cartItemsAry = $carts[0];
-            //     $total = $carts[1];
-            //     return response()->json(['success' => true,
-            //                             'data' => [
-            //                                 'carts' => $cartItemsAry,
-            //                                 'total' => $total,
-            //                                 ]]);
-            // } else {
-            //     return $this->errorResponse('購物車為空', 400);
-            // }
         }
+        return $this->errorResponse('無效驗證', 401);
     }
 
     public function addToCart(Request $request, User $user, $id)
@@ -91,6 +81,31 @@ class CartController extends Controller
         return $this->errorResponse('無效驗證', 401);
     }
 
+    public function applyCoupon(Request $request, User $user)
+    {
+        $currentUser = $user->getUserFromRT($request);
+        if ($currentUser) {
+            $validator = Validator::make($request->all(), [
+                'code' => 'required|string',
+            ]);
+            if ($validator->fails()) {
+                return $this->errorResponse('格式錯誤', 400);
+            }
+
+            $coupon = Coupon::where('code', $request->input('code'))->first();
+            $cartItems = $currentUser->getCartOrCreate()->cartItems;
+            foreach ($cartItems as $cartItem) {
+                $cartItem->coupon_id = $coupon->id;
+                $cartItem->save();
+            }
+            $discountPresent = $coupon->discount_present / 100;
+            $amount = $this->getEndPrice($currentUser) * $discountPresent;
+
+            return response()->json(['success' => true, 'message' => '已套用優惠券', 'data' => ['final_amount' => $amount]]);
+        }
+        return $this->errorResponse('無效驗證', 401);
+    }
+
     public function deleteCartItem(Request $request, User $user, $id)
     {
         $currentUser = $user->getUserFromRT($request);
@@ -123,7 +138,7 @@ class CartController extends Controller
         } 
         
         if ($currentUser) {
-            if (!$this->authTokenVerify()){
+            if (!$this->authTokenVerify()) {
                 return $this->errorResponse('auth token失效', 401);
             }
             if ($this->updateToDBCart($currentUser, $quantity, $id)) {
@@ -131,13 +146,15 @@ class CartController extends Controller
             } else {
                 return $this->errorResponse('更新失敗', 400);
             }
-        } else {
-            if (($cookieCart = $this->updateToCookieCart($request, $quantity, $id)) !== false) {
-                return $this->saveCookieCart($cookieCart, '更新購物車成功');
-            } else {
-                return $this->errorResponse('更新失敗', 400);
-            }
         }
+        return $this->errorResponse('無效驗證', 401);
+        // else {
+        //     if (($cookieCart = $this->updateToCookieCart($request, $quantity, $id)) !== false) {
+        //         return $this->saveCookieCart($cookieCart, '更新購物車成功');
+        //     } else {
+        //         return $this->errorResponse('更新失敗', 400);
+        //     }
+        // }
     }
 
 
@@ -166,6 +183,7 @@ class CartController extends Controller
         $amount = 0;
 
         $cartItems = $currentUser->getCartOrCreate()->cartItems;
+
         foreach ($cartItems as $cartItem) {
             array_push($productIdsAry, $cartItem->product_id);
         }
@@ -174,46 +192,15 @@ class CartController extends Controller
         if (!$cartItemsAry) {
             return false;
         }
-        foreach ($cartItemsAry as $cartItemAry) {
-            $amount += (($cartItemAry->quantity) * ($cartItemAry->product->price));
-        }
 
+        $cartItemsAry = json_decode(json_encode($cartItemsAry));
+
+        foreach ($cartItemsAry as $cartItemAry) {
+            $amount += (($cartItemAry->quantity) * ($cartItemAry->discount_price));
+        }
+        
         return array($cartItemsAry, $amount);
     }
-
-
-    // private function getCartProducts(Request $request, $cartItemsAry = [], $productIdsAry = [], $total = 0)
-    // {
-    //     $cookieCartsAry = [];
-    //     $i = 0;
-    //     $cookieCart = $this->getCartFromCookie($request);
-        
-    //     foreach ($cookieCart as $productIds => $quantity) {
-    //         $productId = explode('_', $productIds)[2];
-    //         array_push($productIdsAry, $productId);
-    //         $cookieCartsAry[$productId] = $quantity;
-    //     }
-
-    //     $cartProducts = ProductResource::collection(Product::find($productIdsAry));
-
-    //     if (!isset($cartProducts[0])) {
-    //         return false;
-    //     }
-
-    //     foreach ($cartProducts as $cartProduct) {
-    //         $cartItemsAry[$i]['product_id'] = $cartProduct->id;
-
-    //         foreach ($cookieCartsAry as $productId => $quantity) {
-    //             if ($productId === $cartProduct->id) {
-    //                 $cartItemsAry[$i]['quantity'] = intval($quantity);
-    //                 $total += $quantity * $cartProduct->price;
-    //             }
-    //         }
-    //         $cartItemsAry[$i]['product'] = $cartProduct;
-    //         $i += 1;
-    //     }
-    //     return array($cartItemsAry, $total);
-    // }
 
     private function addToDBCart($currentUser, $id, $quantity)
     {
@@ -279,16 +266,16 @@ class CartController extends Controller
         return false;
     }
 
-    private function updateToCookieCart(Request $request, $quantity, $id)
-    {
-        $cookieCart = $this->getCartFromCookie($request);
-        $productId = "product_id_" . $id;
-        if (isset($cookieCart[$productId])) {
-            $cookieCart[$productId] = $quantity;
-            return $cookieCart;
-        }
-        return false;
-    }
+    // private function updateToCookieCart(Request $request, $quantity, $id)
+    // {
+    //     $cookieCart = $this->getCartFromCookie($request);
+    //     $productId = "product_id_" . $id;
+    //     if (isset($cookieCart[$productId])) {
+    //         $cookieCart[$productId] = $quantity;
+    //         return $cookieCart;
+    //     }
+    //     return false;
+    // }
 
     private function getCartFromCookie(Request $request)
     {

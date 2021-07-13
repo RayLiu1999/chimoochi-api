@@ -16,7 +16,7 @@ class CouponSeeder extends Seeder
     {
         Coupon::create([
             'name' => '歡慶開幕',
-            'code' => '	CHIMOOCHIOPEN',
+            'code' => 'CHIMOOCHIOPEN',
             'discount_present' => 80,
             'expired_at' => date("Y-m-d H:i:s", 1645545599),
             'is_enabled' => true,

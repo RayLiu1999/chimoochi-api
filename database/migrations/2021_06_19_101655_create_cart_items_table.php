@@ -18,6 +18,7 @@ class CreateCartItemsTable extends Migration
             $table->foreignId('product_id');
             $table->integer('quantity');
             $table->foreignId('cart_id');
+            $table->foreignId('coupon_id')->nullable();
             $table->timestamps();
         });
     }

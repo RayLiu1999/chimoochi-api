@@ -23,5 +23,10 @@ class CartItem extends Model
     {
         return $this->belongsTo(Cart::class);
     }
+    
+    public function coupon()
+    {
+        return $this->belongsTo(Coupon::class);
+    }
 
 }

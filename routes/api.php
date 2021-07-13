@@ -38,6 +38,7 @@ Route::group(['prefix' => 'cart'], function () {
     Route::post('/addToCart/{id}', [CartController::class, 'addToCart']);
     Route::delete('/deleteCartItem/{id}', [CartController::class, 'deleteCartItem']);
     Route::patch('/updateCartItem/{id}', [CartController::class, 'updateCartItem']);
+    Route::post('/applyCoupon', [CartController::class, 'applyCoupon']);
     Route::post('/checkout', [CartController::class, 'checkout']);
 });
 
