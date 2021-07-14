@@ -28,7 +28,7 @@ class CartItemResource extends JsonResource
             'quantity' => $this->quantity,
             'is_discounted' => isset($discountPresent) ? true : false,
             'discount_present' => $discountPresent ?? 100,
-            'discount_price' => isset($discountPresent) ? ($discountPresent / 100 * $products->price) : $products->price,
+            'discount_price' => isset($discountPresent) ? intval($discountPresent / 100 * $products->price) : $products->price,
             'product' => $products,
         ];
     }

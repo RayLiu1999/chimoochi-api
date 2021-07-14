@@ -98,10 +98,9 @@ class CartController extends Controller
                 $cartItem->coupon_id = $coupon->id;
                 $cartItem->save();
             }
-            $discountPresent = $coupon->discount_present / 100;
-            $amount = $this->getEndPrice($currentUser) * $discountPresent;
+            $amount = $this->getEndPrice($currentUser);
 
-            return response()->json(['success' => true, 'message' => '已套用優惠券', 'data' => ['final_amount' => $amount]]);
+            return response()->json(['success' => true, 'message' => '已套用優惠券']);
         }
         return $this->errorResponse('無效驗證', 401);
     }
@@ -340,6 +339,7 @@ class CartController extends Controller
                     'price' => $cartItem->product->price,
                     'quantity' => $cartItem->quantity,
                     'product_id' => $cartItem->product_id,
+                    'coupon_id' => $cartItem->coupon_id ?? null,
                 ]);
             }));
             

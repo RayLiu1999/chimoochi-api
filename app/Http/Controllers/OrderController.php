@@ -21,14 +21,46 @@ class OrderController extends Controller
         ]);
     }
 
-
-
-    
-
     public function update(Request $request, $id)
     {
-        //
+        if (($order = $this->checkRequest($request)) === false) {
+            return $this->messageResponse(false, '格式錯誤', 400);
+        }
+
+        Order::find(1)
+        ->update([
+            'name' => $reqorder['name'],
+            'code' => $reqorder['code'],
+            'discount_present' => $reqorder['discount_present'],
+            'is_enabled' => $reqorder['is_enabled'],
+            'expired_at' => date("Y-m-d H:i:s", $reqorder['expired_at']),
+        ]);
+
+        return $this->messageResponse(true, '訂單更新成功');
+
     }
+
+    private function checkRequest(Request $request)
+    {
+        $order = $request->input('data');
+        $validator = Validator::make($order, [
+            'name' => ['required', 'string'],
+            'code' => ['required', 'string'],
+            'discount_present' => ['required', 'integer'],
+            'is_enabled' => ['required', 'boolean'],
+            'expired_at' => ['required', 'integer'],
+        ]);
+        if ($validator->fails()) {
+            return false;
+        }
+        return $order;
+    }
+
+    private function messageResponse($boolean, $message, $status = 200)
+    {
+        return response()->json(['success' => $boolean, 'message' => $message], $status);
+    }
+
 
     private function payment()
     {

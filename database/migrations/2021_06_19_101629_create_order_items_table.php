@@ -20,6 +20,7 @@ class CreateOrderItemsTable extends Migration
             $table->integer('quantity');
             $table->foreignId('order_id');
             $table->foreignId('product_id');
+            $table->foreignId('coupon_id')->nullable();
             $table->timestamps();
         });
     }

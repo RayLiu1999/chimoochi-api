@@ -102,7 +102,7 @@ class ProductController extends Controller
         if ($product->delete()) {
             return $this->messageResponse(true, '商品刪除成功');
         }
-        return $this->messageResponse(false, '錯誤', 403);
+        return $this->messageResponse(false, '刪除失敗', 403);
     }
 
 

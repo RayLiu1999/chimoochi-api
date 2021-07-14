@@ -46,7 +46,7 @@ Route::group(['prefix' => 'cart'], function () {
 Route::group(['prefix' => 'admin', 'middleware' => ['auth.jwt', 'is_admin']], function () {
     Route::resource('products', ProductController::class)->except(['create', 'edit', 'show']);
     Route::get('orders', [OrderController::class, 'index']);
-    Route::patch('orders', [OrderController::class, 'update']);
+    Route::patch('order/{id}', [OrderController::class, 'update']);
     Route::resource('coupons', CouponController::class)->except(['create', 'show', 'edit']);
 });
 
