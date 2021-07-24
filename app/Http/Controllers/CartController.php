@@ -66,15 +66,14 @@ class CartController extends Controller
             if (!$this->authTokenVerify()){
                 return $this->errorResponse('auth token失效', 401);
             }
-
             $order = $this->createOrderByCart($request, $currentUser);
-            if ($order === '格式錯誤'){
+            if ($order === false){
                 return $this->errorResponse('格式錯誤', 400);
             }
-            if ($order === null) {
+            if (empty($order)) {
                 return $this->errorResponse('訂單為空', 400);
             }
-            dd($order->order_number);
+            
             $hashKey = env('MPG_HashKey', '');
             $hashIV = env('MPG_hashIV', '');
             $tradeInfoAry = [
@@ -351,7 +350,7 @@ class CartController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return '格式錯誤';
+            return false;
         }
         
         DB::transaction(function () use ($request, $currentUser, $cart, $amount, &$order) {  
