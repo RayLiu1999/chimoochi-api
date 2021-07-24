@@ -17,7 +17,7 @@ class CORSVerify
     public function handle(Request $request, Closure $next)
     {
         $origin = $request->header('Origin');
-        $domain = ['http://127.0.0.1:8000', 'https://6yuwei.com'];
+        $domain = ['http://127.0.0.1:8000', 'https://6yuwei.com', 'https://chimoochi-api.herokuapp.com/'];
         $methods = 'PUT, GET, POST, DELETE, OPTIONS';
         if ($origin && collect($domain)->contains($origin)) {
             return $next($request)
