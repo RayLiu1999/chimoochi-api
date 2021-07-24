@@ -66,15 +66,46 @@ class CartController extends Controller
             if (!$this->authTokenVerify()){
                 return $this->errorResponse('auth token失效', 401);
             }
-            $result = $this->createOrderByCart($request, $currentUser);
-            if ($result !== true) {
-                if ($result === '格式錯誤'){
-                    return $this->errorResponse('格式錯誤', 400);
-                }
-                if ($result === '訂單為空') {
-                    return $this->errorResponse('訂單為空', 400);
-                }
+
+            $order = $this->createOrderByCart($request, $currentUser);
+            if ($order === '格式錯誤'){
+                return $this->errorResponse('格式錯誤', 400);
             }
+            if ($order === null) {
+                return $this->errorResponse('訂單為空', 400);
+            }
+            dd($order->order_number);
+            $hashKey = env('MPG_HashKey', '');
+            $hashIV = env('MPG_hashIV', '');
+            $tradeInfoAry = [
+                'MerchantID' => env('MPG_MerchantID', ''),
+                'Version' => env('MPG_Version', ''), 
+                'RespondType' => env('MPG_RespondType', ''),
+                'TimeStamp' => time(),
+                'LangType' => env('MPG_LangType', ''),
+                'MerchantOrderNo' => $order->order_number,
+                'Amt' => $order->amount,
+                'ItemDesc' => '一堆椅子',
+                'TradeLimit' => env('MPG_TradeLimit', ''),
+                'ExpireDate' => date('Ymd', strtotime(date('') . '+ 3 days')),
+                'Email' => env('MPG_Email', ''),
+                'LoginType' => env('MPG_LoginType', ''),
+                'OrderComment' => '收到請檢查有無受損',
+                'CREDIT' => env('MPG_CREDIT', ''),
+                'InstFlag' => env('MPG_InstFlag', ''),
+                'WEBATM' => env('MPG_WEBATM', ''),
+                'VACC' => env('MPG_VACC', ''),
+                'CVS' => env('MPG_CVS', ''),
+                'BARCODE' => env('MPG_BARCODE', ''),
+                //'CVSCOM' => '3',
+                // 'ReturnURL' => env('APP_URL') . env('MPG_ReturnURL', ''),
+                // 'NotifyURL' => env('APP_URL') . env('MPG_NotifyURL', ''),
+                // 'CustomerURL' => env('APP_URL') . env('MPG_CustomerURL', ''),
+                // 'ClientBackURL' => env('APP_URL') . env('MPG_ClientBackURL', ''),
+            ];
+    
+            $tradeInfo = $this->create_mpg_aes_encrypt($tradeInfoAry, $hashKey, $hashIV);
+            $tradeSha = strtoupper(hash("sha256", "HashKey={$hashKey}&{$tradeInfo}&HashIV={$hashIV}"));
 
             return response()->json(['success' => true, 'message' => '訂單建立成功']);
         }
@@ -304,11 +335,12 @@ class CartController extends Controller
     private function createOrderByCart(Request $request, $currentUser)
     {
         $cart = $currentUser->getCartOrCreate();
-        $amount = $this->getEndPrice($currentUser);
-        
-        if ($amount === 0) {
-            return '訂單為空';
+        if ($cart->cartItems()->count() == 0) {
+            return null;
         }
+
+        $amount = $this->getEndPrice($currentUser);
+        $order = null;
 
         $validator = Validator::make($request->all(), [
             'user.name' => ['required', 'string'],
@@ -322,7 +354,7 @@ class CartController extends Controller
             return '格式錯誤';
         }
         
-        DB::transaction(function () use ($request, $currentUser, $cart, $amount) {  
+        DB::transaction(function () use ($request, $currentUser, $cart, $amount, &$order) {  
             $order = Order::create([
                 'ship_name' => $request->input('user.name'),
                 'ship_email' => $request->input('user.email'),
@@ -345,7 +377,23 @@ class CartController extends Controller
             
             $cart->cartItems()->delete();
         });
-        return true;
+        return $order;
+    }
+
+    private function create_mpg_aes_encrypt ($parameter = "" , $key = "", $iv = "") {
+        $return_str = '';
+        if (!empty($parameter)) {
+            //將參數經過 URL ENCODED QUERY STRING
+            $return_str = http_build_query($parameter);
+        }
+        return trim(bin2hex(openssl_encrypt($this->addpadding($return_str), 'aes-256-cbc', $key, OPENSSL_RAW_DATA|OPENSSL_ZERO_PADDING, $iv)));
+    }
+
+    private function addpadding($string, $blocksize = 32) {
+        $len = strlen($string);
+        $pad = $blocksize - ($len % $blocksize);
+        $string .= str_repeat(chr($pad), $pad);
+        return $string;
     }
 
 }

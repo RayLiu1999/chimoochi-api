@@ -40,6 +40,8 @@ class OrderController extends Controller
 
     }
 
+
+
     private function checkRequest(Request $request)
     {
         $order = $request->input('data');
@@ -62,39 +64,46 @@ class OrderController extends Controller
     }
 
 
-    private function payment()
+    public function payment()
     {
-        $hashKey = 'ZTG2eu6Vl45YaJQdpoVvXZZLP3T3GzhD';
-        $hashIV = 'CZOsgjdYOfB8mxGP';
+        $hashKey = env('MPG_HashKey', '');
+        $hashIV = env('MPG_hashIV', '');
         $tradeInfoAry = [
-            'MerchantID' => '',
-            'Version' => '1.5',
-            'RespondType' => 'JSON',
+            'MerchantID' => env('MPG_MerchantID', ''),
+            'Version' => env('MPG_Version', ''),
+            'RespondType' => env('MPG_RespondType', ''),
             'TimeStamp' => time(),
-            'LangType' => 'zh-tw',
-            'MerchantOrderNo' => 'aaa' . time(),
-            'Amt' => '1000',
+            'LangType' => env('MPG_LangType', ''),
+            'MerchantOrderNo' => '',
+            'Amt' => '',
             'ItemDesc' => '一堆椅子',
-            'TradeLimit' => '900',
+            'TradeLimit' => env('MPG_TradeLimit', ''),
             'ExpireDate' => date('Ymd', strtotime(date('') . '+ 3 days')),
-            'Email' => 'Ffjidos@gmail.com',
-            'LoginType' => '0',
+            'Email' => env('MPG_Email', ''),
+            'LoginType' => env('MPG_LoginType', ''),
             'OrderComment' => '收到請檢查有無受損',
-            'CREDIT' => '1',
-            'InstFlag' => '3,6,12',
-            'WEBATM' => '1',
-            'VACC' => '1',
-            'CVS' => '1',
-            'BARCODE' => '1',
+            'CREDIT' => env('MPG_CREDIT', ''),
+            'InstFlag' => env('MPG_InstFlag', ''),
+            'WEBATM' => env('MPG_WEBATM', ''),
+            'VACC' => env('MPG_VACC', ''),
+            'CVS' => env('MPG_CVS', ''),
+            'BARCODE' => env('MPG_BARCODE', ''),
             //'CVSCOM' => '3',
-            'ReturnURL' => env('APP_URL') . env('MPG_ReturnURL', ''),
-            'NotifyURL' => env('APP_URL') . env('MPG_NotifyURL', ''),
-            'CustomerURL' => env('APP_URL') . env('MPG_CustomerURL', ''),
-            'ClientBackURL' => env('APP_URL') . env('MPG_ClientBackURL', ''),
+            // 'ReturnURL' => env('APP_URL') . env('MPG_ReturnURL', ''),
+            // 'NotifyURL' => env('APP_URL') . env('MPG_NotifyURL', ''),
+            // 'CustomerURL' => env('APP_URL') . env('MPG_CustomerURL', ''),
+            // 'ClientBackURL' => env('APP_URL') . env('MPG_ClientBackURL', ''),
         ];
 
         $tradeInfo = $this->create_mpg_aes_encrypt($tradeInfoAry, $hashKey, $hashIV);
         $tradeSha = strtoupper(hash("sha256", "HashKey={$hashKey}&{$tradeInfo}&HashIV={$hashIV}"));
+
+        return response()->json([
+            'MerchantID' => $tradeInfoAry['MerchantID'],
+            'TradeInfo' => $tradeInfo,
+            'TradeSha' => $tradeSha,
+            'Version' => $tradeInfoAry['Version'],
+        ]);
     }
 
     private function create_mpg_aes_encrypt ($parameter = "" , $key = "", $iv = "") {
