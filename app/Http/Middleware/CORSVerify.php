@@ -17,16 +17,16 @@ class CORSVerify
     public function handle(Request $request, Closure $next)
     {
         $origin = $request->header('Origin');
-        $domain = ['http://127.0.0.1:8000', 'http://localhost:8080','https://6yuwei.com', 'https://chimoochi-api.herokuapp.com'];
-        $methods = 'PUT, GET, POST, DELETE, OPTIONS';
+        $domain = ['http://127.0.0.1:8000', 'http://localhost:8080', 'https://6yuwei.com', 'https://chimoochi-api.herokuapp.com'];
+        $methods = 'PUT, GET, POST, DELETE, OPTIONS, PATCH';
 
-        if ($origin && collect($domain)->contains($origin)) {
+        if (true) {
             return $next($request)
-                    ->header('Access-Control-Allow-Origin', $origin)
+                    ->header('Access-Control-Allow-Origin', '*')
                     ->header('Access-Control-Allow-Methods', $methods)
                     ->header('Access-Control-Allow-Credentials', true);
         } else {
-            return response()->json(['error' => 'CORS error'], 404)->header('Access-Control-Allow-Origin', $domain[0]);
+            return response()->json(['error' => 'CORS error'], 404)->header('Access-Control-Allow-Origin', $domain[2]);
         }
 
         // return $next($request)
