@@ -18,7 +18,7 @@ class CORSVerify
     {
         $origin = $request->header('Origin');
         $domain = ['http://127.0.0.1:8000', 'http://localhost:8080', 'https://6yuwei.com', 'https://chimoochi-api.herokuapp.com', 'http://127.0.0.1:8080', 'http://127.0.0.1:5500'];
-        $methods = 'PUT, GET, POST, DELETE, OPTIONS, PATCH';
+        $methods = 'PUT, GET, POST, DELETE, PATCH, OPTIONS';
 
         // if ($origin && collect($domain)->contains($origin)) {
         //     return $next($request)
@@ -32,6 +32,6 @@ class CORSVerify
 
         return $next($request)
                     ->header('Access-Control-Allow-Origin', '*')
-                    ->header('Access-Control-Allow-Methods', $methods);
+                    ->header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, PATCH, OPTIONS');
     }
 }
