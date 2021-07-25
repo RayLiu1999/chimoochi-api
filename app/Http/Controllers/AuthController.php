@@ -5,28 +5,30 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
+use App\Models\CartItem;
 
 class AuthController extends Controller
 {
-    public function login(Request $request)
+    public function login(Request $request, User $user)
     {
-        $validator = Validator::make($request->all(), [
-            'email' => ['required', 'email'],
-            'password' => ['required', 'min:6'],
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['success' => false, 'message' => '帳號或密碼格式錯誤'], 400);
+        $validator = $this->checkRequest($request);
+        if ($validator === false) {
+            return $this->messageResponse(false, '帳號或密碼格式錯誤', 400);
         }
 
         if (!$authToken = auth()->attempt($validator->validated())) {
-            return response()->json(['success' => false, 'message' => '無效的驗證'], 401);
+            return $this->messageResponse(false, '無效的驗證', 401);
         };
 
         $refreshToken = $this->randomRefreshToken();
 
-        User::where('email', $request->email)
+        $user->where('email', $request->input('user.email'))
             ->update(['refresh_token' => $refreshToken]);
+
+        $currentUser = $user->first();
+        if ($cookieCart = $request->cookie('cart')) {
+            $this->cookieCartAddToCartItem($cookieCart, $currentUser);
+        }
 
         return $this->respondWithToken($authToken, $refreshToken);
     }
@@ -34,50 +36,42 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'email' => ['required', 'email'],
-            'password' => ['required', 'string', 'min:6']
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['success' => false, 'message' => '帳號或密碼格式錯誤'], 400);
+        $validator = $this->checkRequest($request);
+        if ($validator === false) {
+            return $this->messageResponse(false, '帳號或密碼格式錯誤', 400);
         }
 
-        $user = User::where('email', $request->email)->first();
+        $user = User::where('email', $request->input('user.email'))->first();
         if ($user !== null) {
-            return response()->json(['success' => false, 'message' => '信箱已被使用'], 400);
+            return $this->messageResponse(false, '信箱已被使用', 400);
         }
 
-        User::create(array_merge(
-            $validator->validated(),
-            ['password' => bcrypt($request->password)]
-        ));
+        $refreshToken = $this->randomRefreshToken();
+        User::create([
+                'email' => $request->input('user.email'),
+                'password' => bcrypt($request->input('user.email')),
+                'refresh_token' => $refreshToken
+            ]);
 
-        return response()->json([
-            'success' => true, 'message' => '註冊成功'
-        ]);
+        return $this->messageResponse(true, '註冊成功');
     }
 
 
-    public function logout(Request $request, User $user)
+    public function logout(User $user)
     {
-        $user = $user->getUserFromRT($request);
-
-        if ($user) {
-            if (auth()->user()) {
-                auth()->logout();
-            }
-            $user->update(['refresh_token' => $this->randomRefreshToken()]);
-            return response()->json(['success' => true, 'message' => '登出成功'])->withCookie('refresh_token');
+        if (auth()->user()) {
+            auth()->logout();
         }
-        return response()->json(['success' => false, 'message' => '無此refresh_token'], 401);
+        $user->update(['refresh_token' => $this->randomRefreshToken()]);
+        
+        return response()->json(['success' => true, 'message' => '登出成功'])->withCookie('refresh_token');
     }
 
 
     public function refresh_token(Request $request, User $user)
     {
         $user = $user->getUserFromRT($request);
-    
+
         if ($user) {
             $newRefreshToken = $this->randomRefreshToken();
             $user->update(['refresh_token' => $newRefreshToken]);
@@ -89,7 +83,20 @@ class AuthController extends Controller
 
             return $this->respondWithToken($newAuthToken, $newRefreshToken);
         }
-        return response()->json(['success' => false, 'message' => '無效的驗證'], 401);
+        return $this->messageResponse(false, '無效的refresh token', 401);
+    }
+
+
+    private function checkRequest(Request $request)
+    {
+        $validator = Validator::make($request->input('user'), [
+            'email' => ['required', 'email'],
+            'password' => ['required', 'string', 'min:6']
+        ]);
+        if ($validator->fails()) {
+            return false;
+        }
+        return $validator;
     }
 
     private function randomRefreshToken($length = 32, $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
@@ -111,13 +118,48 @@ class AuthController extends Controller
     {
         return response()->json([
             'success' => true,
+            'message' => '登入成功',
             'data' => [
                 'authToken' => $authToken,
                 'token_type' => 'bearer',
                 'expires_in' => auth()->factory()->getTTL() * 60,
             ]
         ])
-        ->cookie('refresh_token', $newRefreshToken, 60 * 24);
+        ->cookie('refresh_token', $newRefreshToken, 60 * 24)
+        ->withCookie('cart');
+    }
+
+    private function messageResponse($boolean, $message, $status = 200)
+    {
+        return response()->json(['success' => $boolean, 'message' => $message], $status);
+    }
+
+    private function cookieCartAddToCartItem($cookieCart, $currentUser)
+    {
+        $cart = $currentUser->getCartOrCreate();
+        $cookieCartAry = json_decode($cookieCart, true);
+        
+        foreach ($cookieCartAry as $key => $value) {
+            $productId = str_replace('product_id_', '', $key);
+            $cookieCartAry[$productId] = $cookieCartAry[$key];
+            unset($cookieCartAry[$key]);
+        }
+
+        foreach ($cookieCartAry as $productId => $quantity) {
+            $cartItem = $cart->cartItems()->where('product_id', $productId)->first();
+            if ($cartItem) {
+                $cartItem->quantity += $quantity;
+                $cartItem->save();
+            } else {
+                $cart->cartItems()->save(
+                    new CartItem([
+                        'product_id' => $productId,
+                        'quantity' => $quantity
+                    ])
+                );
+            }
+
+        }
     }
 
 }

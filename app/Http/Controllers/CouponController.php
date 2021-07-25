@@ -9,9 +9,10 @@ use Illuminate\Http\Request;
 
 class CouponController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(['success' => true, 'data' => CouponResource::collection(Coupon::all())]);
+        $limit = $request->limit ?? 10;
+        return response()->json(['success' => true, 'data' => CouponResource::collection(Coupon::paginate($limit))]);
     }
 
     public function store(Request $request)
@@ -61,7 +62,7 @@ class CouponController extends Controller
 
     private function checkRequest(Request $request)
     {
-        $coupon = $request->input('data');
+        $coupon = $request->input('coupon');
         $validator = Validator::make($coupon, [
             'name' => ['required', 'string'],
             'code' => ['required', 'string'],

@@ -13,49 +13,48 @@ use App\Models\User;
 
 class OrderController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $limit = $request->limit ?? 10;
         return response()->json([
             'success' => true,
-            'data' => OrderResource::collection(Order::all()),
+            'data' => OrderResource::collection(Order::paginate($limit)),
         ]);
     }
 
     public function update(Request $request, $id)
     {
-        if (($order = $this->checkRequest($request)) === false) {
+        if (!$order = $this->checkRequest($request)) {
             return $this->messageResponse(false, '格式錯誤', 400);
         }
 
-        Order::find(1)
-        ->update([
-            'name' => $reqorder['name'],
-            'code' => $reqorder['code'],
-            'discount_present' => $reqorder['discount_present'],
-            'is_enabled' => $reqorder['is_enabled'],
-            'expired_at' => date("Y-m-d H:i:s", $reqorder['expired_at']),
+        Order::find($id)->update([
+            'name' => $order['name'],
+            'email' => $order['email'],
+            'tel' => $order['tel'],
+            'address' => $order['address'],
+            'ship_message' => $request->message,
         ]);
 
         return $this->messageResponse(true, '訂單更新成功');
-
     }
 
 
 
     private function checkRequest(Request $request)
     {
-        $order = $request->input('data');
-        $validator = Validator::make($order, [
-            'name' => ['required', 'string'],
-            'code' => ['required', 'string'],
-            'discount_present' => ['required', 'integer'],
-            'is_enabled' => ['required', 'boolean'],
-            'expired_at' => ['required', 'integer'],
+        $order = $request->input('user');
+        $validator = Validator::make($request->all(), [
+            'user.name' => ['required', 'email', 'string'],
+            'user.email' => ['required', 'string'],
+            'user.tel' => ['required', 'string'],
+            'user.address' => ['required', 'string', 'max: 50'],
+            'message' => ['nullable', 'string'],
         ]);
         if ($validator->fails()) {
             return false;
         }
-        return $order;
+        return  $order;
     }
 
     private function messageResponse($boolean, $message, $status = 200)

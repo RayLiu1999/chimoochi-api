@@ -10,12 +10,14 @@ use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
 {    
-    public function index()
+    public function index(Request $request)
     {
+        $limit = $request->limit ?? 12;
+
         return response()->json([
             'success' => true, 
             'data' => [
-                'products' => ProductResource::collection(Product::all()),
+                'products' => ProductResource::collection(Product::paginate($limit)),
             ],
         ]);
     }
@@ -48,8 +50,9 @@ class ProductController extends Controller
             'origin_price' => $request->input('origin_price'),
             'price' => $request->input('price'),
             'unit' => $request->input('unit'),
-            'is_enabled' => $request->boolean('enabled'),
+            'is_enabled' => $request->boolean('is_enabled'),
             'quantity' => $request->input('quantity'),
+            'message' => $request->input('message'),
         ]);
         return $this->messageResponse(true, '商品建立成功');
     }
@@ -90,8 +93,9 @@ class ProductController extends Controller
             'origin_price' => $request->input('origin_price'),
             'price' => $request->input('price'),
             'unit' => $request->input('unit'),
-            'is_enabled' => $request->boolean('enabled'),
+            'is_enabled' => $request->boolean('is_enabled'),
             'quantity' => $request->input('quantity'),
+            'message' => $request->input('message'),
         ]);
 
         return $this->messageResponse(true, '商品更新成功');    
@@ -125,6 +129,7 @@ class ProductController extends Controller
             'unit' => ['required', 'string'],
             'is_enabled' => ['boolean'],
             'quantity' => ['required', 'integer'],
+            'message' => ['nullable', 'string', 'max: 100'],
         ]);
 
         if ($validator->fails()) {

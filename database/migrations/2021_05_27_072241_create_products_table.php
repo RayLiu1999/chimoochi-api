@@ -23,7 +23,7 @@ class CreateProductsTable extends Migration
             $table->unsignedInteger('price');
             $table->string('unit');
             $table->boolean('is_enabled')->default(false);
-            $table->string('content')->nullable();
+            $table->string('message')->nullable();
             $table->integer('quantity');
             $table->timestamps();
         });
