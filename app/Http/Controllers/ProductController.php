@@ -137,4 +137,10 @@ class ProductController extends Controller
         }
         return true;
     }
+
+
+    public function test()
+    {
+        return response('test!!!!!!!!!!!!!!!!!!');
+    }
 }
