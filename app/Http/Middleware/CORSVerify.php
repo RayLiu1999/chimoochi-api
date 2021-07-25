@@ -30,8 +30,10 @@ class CORSVerify
         //     return response()->json(['error' => 'CORS error'], 404)->header('Access-Control-Allow-Origin', $domain[2]);
         // }
 
+
         return $next($request)
-                    ->header('Access-Control-Allow-Origin', '*')
-                    ->header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, PATCH, OPTIONS');
+                    ->header('Access-Control-Allow-Origin: *')
+                    ->header('Access-Control-Allow-Methods: *')
+                    ->header('Access-Control-Allow-Headers: *');
     }
 }
