@@ -76,38 +76,38 @@ class CartController extends Controller
         if (empty($order)) {
             return $this->errorResponse('購物車為空', 400);
         }
+        
+        $hashKey = env('MPG_HashKey', '');
+        $hashIV = env('MPG_hashIV', '');
+        $tradeInfoAry = [
+            'MerchantID' => env('MPG_MerchantID', ''),
+            'Version' => env('MPG_Version', ''), 
+            'RespondType' => env('MPG_RespondType', ''),
+            'TimeStamp' => time(),
+            'LangType' => env('MPG_LangType', ''),
+            'MerchantOrderNo' => $order->order_number,
+            'Amt' => $order->amount,
+            'ItemDesc' => '一堆椅子',
+            'TradeLimit' => env('MPG_TradeLimit', ''),
+            'ExpireDate' => date('Ymd', strtotime(date('') . '+ 3 days')),
+            'Email' => env('MPG_Email', ''),
+            'LoginType' => env('MPG_LoginType', ''),
+            'OrderComment' => '收到請檢查有無受損',
+            'CREDIT' => env('MPG_CREDIT', ''),
+            'InstFlag' => env('MPG_InstFlag', ''),
+            'WEBATM' => env('MPG_WEBATM', ''),
+            'VACC' => env('MPG_VACC', ''),
+            'CVS' => env('MPG_CVS', ''),
+            'BARCODE' => env('MPG_BARCODE', ''),
+            //'CVSCOM' => '3',
+            // 'ReturnURL' => env('APP_URL') . env('MPG_ReturnURL', ''),
+            // 'NotifyURL' => env('APP_URL') . env('MPG_NotifyURL', ''),
+            // 'CustomerURL' => env('APP_URL') . env('MPG_CustomerURL', ''),
+            // 'ClientBackURL' => env('APP_URL') . env('MPG_ClientBackURL', ''),
+        ];
 
-        // $hashKey = env('MPG_HashKey', '');
-        // $hashIV = env('MPG_hashIV', '');
-        // $tradeInfoAry = [
-        //     'MerchantID' => env('MPG_MerchantID', ''),
-        //     'Version' => env('MPG_Version', ''), 
-        //     'RespondType' => env('MPG_RespondType', ''),
-        //     'TimeStamp' => time(),
-        //     'LangType' => env('MPG_LangType', ''),
-        //     'MerchantOrderNo' => $order->order_number,
-        //     'Amt' => $order->amount,
-        //     'ItemDesc' => '一堆椅子',
-        //     'TradeLimit' => env('MPG_TradeLimit', ''),
-        //     'ExpireDate' => date('Ymd', strtotime(date('') . '+ 3 days')),
-        //     'Email' => env('MPG_Email', ''),
-        //     'LoginType' => env('MPG_LoginType', ''),
-        //     'OrderComment' => '收到請檢查有無受損',
-        //     'CREDIT' => env('MPG_CREDIT', ''),
-        //     'InstFlag' => env('MPG_InstFlag', ''),
-        //     'WEBATM' => env('MPG_WEBATM', ''),
-        //     'VACC' => env('MPG_VACC', ''),
-        //     'CVS' => env('MPG_CVS', ''),
-        //     'BARCODE' => env('MPG_BARCODE', ''),
-        //     //'CVSCOM' => '3',
-        //     // 'ReturnURL' => env('APP_URL') . env('MPG_ReturnURL', ''),
-        //     // 'NotifyURL' => env('APP_URL') . env('MPG_NotifyURL', ''),
-        //     // 'CustomerURL' => env('APP_URL') . env('MPG_CustomerURL', ''),
-        //     // 'ClientBackURL' => env('APP_URL') . env('MPG_ClientBackURL', ''),
-        // ];
-
-        // $tradeInfo = $this->create_mpg_aes_encrypt($tradeInfoAry, $hashKey, $hashIV);
-        // $tradeSha = strtoupper(hash("sha256", "HashKey={$hashKey}&{$tradeInfo}&HashIV={$hashIV}"));
+        $tradeInfo = $this->create_mpg_aes_encrypt($tradeInfoAry, $hashKey, $hashIV);
+        $tradeSha = strtoupper(hash("sha256", "HashKey={$hashKey}&{$tradeInfo}&HashIV={$hashIV}"));
 
         return response()->json(['success' => true, 'message' => '訂單建立成功']);
     }

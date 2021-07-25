@@ -30,7 +30,17 @@ class AuthController extends Controller
             $this->cookieCartAddToCartItem($cookieCart, $currentUser);
         }
 
-        return $this->respondWithToken($authToken, $refreshToken);
+        return response()->json([
+            'success' => true,
+            'message' => '登入成功',
+            'data' => [
+                'authToken' => $authToken,
+                'token_type' => 'bearer',
+                'expires_in' => auth()->factory()->getTTL() * 60,
+            ]
+        ])
+        ->cookie('refresh_token', $refreshToken, 60 * 24)
+        ->withCookie('cart');
     }
 
 
@@ -81,7 +91,15 @@ class AuthController extends Controller
                 $newAuthToken = auth()->tokenById($user->id);
             }
 
-            return $this->respondWithToken($newAuthToken, $newRefreshToken);
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'authToken' => $newAuthToken,
+                    'token_type' => 'bearer',
+                    'expires_in' => auth()->factory()->getTTL() * 60,
+                ]
+            ])
+            ->cookie('refresh_token', $newRefreshToken, 60 * 24);
         }
         return $this->messageResponse(false, '無效的refresh token', 401);
     }
@@ -112,21 +130,6 @@ class AuthController extends Controller
             $string .= $characters[mt_rand(0, $characters_length)];
         }
         return $string;
-    }
-
-    private function respondWithToken($authToken, $newRefreshToken)
-    {
-        return response()->json([
-            'success' => true,
-            'message' => '登入成功',
-            'data' => [
-                'authToken' => $authToken,
-                'token_type' => 'bearer',
-                'expires_in' => auth()->factory()->getTTL() * 60,
-            ]
-        ])
-        ->cookie('refresh_token', $newRefreshToken, 60 * 24)
-        ->withCookie('cart');
     }
 
     private function messageResponse($boolean, $message, $status = 200)
