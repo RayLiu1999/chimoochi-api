@@ -29,8 +29,8 @@ class CORSVerify
             return response()->json(['error' => 'CORS error'], 404)->header('Access-Control-Allow', $domain[0]);
         }
 
-        return $next($request)
-                    ->header('Access-Control-Allow', '*')
-                    ->header('Access-Control-Allow-Methods', '*');
+        // return $next($request)
+        //             ->header('Access-Control-Allow', '*')
+        //             ->header('Access-Control-Allow-Methods', '*');
     }
 }
