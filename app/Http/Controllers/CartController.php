@@ -79,6 +79,7 @@ class CartController extends Controller
         
         $hashKey = env('MPG_HashKey', '');
         $hashIV = env('MPG_hashIV', '');
+        $expireDaysToPlus = env('MPG_ExpireDate', '');
         $tradeInfoAry = [
             'MerchantID' => env('MPG_MerchantID', ''),
             'Version' => env('MPG_Version', ''), 
@@ -89,8 +90,8 @@ class CartController extends Controller
             'Amt' => $order->amount,
             'ItemDesc' => '一堆椅子',
             'TradeLimit' => env('MPG_TradeLimit', ''),
-            'ExpireDate' => date('Ymd', strtotime(date('') . '+ 3 days')),
-            'Email' => env('MPG_Email', ''),
+            'ExpireDate' => date('Ymd', strtotime(date('') . "+ $expireDaysToPlus days")),
+            'Email' => $order->user->email,
             'LoginType' => env('MPG_LoginType', ''),
             'OrderComment' => '收到請檢查有無受損',
             'CREDIT' => env('MPG_CREDIT', ''),
@@ -108,8 +109,19 @@ class CartController extends Controller
 
         $tradeInfo = $this->create_mpg_aes_encrypt($tradeInfoAry, $hashKey, $hashIV);
         $tradeSha = strtoupper(hash("sha256", "HashKey={$hashKey}&{$tradeInfo}&HashIV={$hashIV}"));
+        $actionUrl = 'https://ccore.newebpay.com/MPG/mpg_gateway';
 
-        return response()->json(['success' => true, 'message' => '訂單建立成功']);
+        return response()->json([
+            'success' => true,
+            'message' => '訂單建立成功',
+            'data' => [
+                'actionUrl' => $actionUrl,
+                'merchantID' => $tradeInfoAry['MerchantID'],
+                'tradeInfo' => $tradeInfo,
+                'tradeSha' => $tradeSha,
+                'version' => $tradeInfoAry['Version'],
+            ],
+        ]);
     }
 
     public function applyCoupon(Request $request)

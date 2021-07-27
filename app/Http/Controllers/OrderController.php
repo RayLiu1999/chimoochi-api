@@ -72,7 +72,7 @@ class OrderController extends Controller
             'RespondType' => env('MPG_RespondType', ''),
             'TimeStamp' => time(),
             'LangType' => env('MPG_LangType', ''),
-            'MerchantOrderNo' => $order->order_number ?? 'gijfdigjo1234',
+            'MerchantOrderNo' => $order->order_number ?? 'gij1fdigjo1234',
             'Amt' => $order->amount ?? '123',
             'ItemDesc' => '一堆椅子',
             'TradeLimit' => env('MPG_TradeLimit', ''),
