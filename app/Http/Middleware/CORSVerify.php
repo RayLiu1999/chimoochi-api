@@ -19,7 +19,7 @@ class CORSVerify
         $origin = $request->header('Origin');
         $domain = ['http://127.0.0.1:8000', 'http://localhost:8080', 'https://6yuwei.com', 'https://chimoochi-api.herokuapp.com', 'http://127.0.0.1:8080', 'http://127.0.0.1:5500'];
         $methods = 'PUT, GET, POST, DELETE, PATCH, OPTIONS';
-        $headers = 'Content-Type, Authorization';
+        $headers = 'Content-Type, Authorization, X-Custom-Header';
         
         if ($origin && collect($domain)->contains($origin)) {
             return $next($request)
