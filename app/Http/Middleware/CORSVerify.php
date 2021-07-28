@@ -21,6 +21,14 @@ class CORSVerify
         $methods = 'PUT, GET, POST, DELETE, PATCH, OPTIONS';
         $headers = 'Content-Type, Authorization, X-Custom-Header';
         
+        if ($request->getMethod() == "OPTIONS") {
+            return $next($request)
+                    ->header('Access-Control-Allow-Origin', $origin)
+                    ->header('Access-Control-Allow-Methods', $methods)
+                    ->header('Access-Control-Allow-Credentials', 'true')
+                    ->header('Access-Control-Allow-Headers', $headers);
+        }
+
         if ($origin && collect($domain)->contains($origin)) {
             return $next($request)
                     ->header('Access-Control-Allow-Origin', $origin)
