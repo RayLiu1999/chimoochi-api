@@ -42,8 +42,6 @@ class CartController extends Controller
         $currentUser = $user->getUserFromRT($request);
         $quantity = $request->input('cart.quantity');
 
-        dd($currentUser);
-
         $validator = Validator::make($request->input('cart'), [
             'quantity' => 'required|integer|max:50',
         ]);
