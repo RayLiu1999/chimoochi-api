@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 use App\Models\CartItem;
+use Illuminate\Support\Facades\Cookie;
 
 class AuthController extends Controller
 {
@@ -39,8 +40,8 @@ class AuthController extends Controller
                 'expires_in' => auth()->factory()->getTTL() * 60,
             ]
         ])
-        ->cookie('refresh_token', $refreshToken, 60 * 24, null, null, true, true)
-        ->withCookie('cart');
+        ->cookie('refresh_token', $refreshToken, 60 * 24, null, null, false, true)
+        ->withoutCookie('cart');
     }
 
 
@@ -74,7 +75,7 @@ class AuthController extends Controller
         }
         $user->update(['refresh_token' => $this->randomRefreshToken()]);
         
-        return response()->json(['success' => true, 'message' => '登出成功'])->withCookie('refresh_token');
+        return response()->json(['success' => true, 'message' => '登出成功'])->withoutCookie('refresh_token');
     }
 
 

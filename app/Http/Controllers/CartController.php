@@ -55,7 +55,7 @@ class CartController extends Controller
             }
             $this->addToDBCart($currentUser, $id, $quantity);
             return response()->json(['success' => true, 'message' => '加入資料庫購物車成功'])
-                            ->withCookie('cart');
+                            ->withoutCookie('cart');
         } else {
             $cookieCart = $this->addToCookieCart($request, $id, $quantity);
             return $this->saveCookieCart($cookieCart, '加入購物車成功');

@@ -24,17 +24,10 @@ class CORSVerify
             return $next($request)
                     ->header('Access-Control-Allow-Origin', $origin)
                     ->header('Access-Control-Allow-Methods', $methods)
-                    ->header('Access-Control-Allow-Credentials', true)
-                    ->header('Access-Control-Allow-Headers', 'Origin, Methods, Content-Type');
+                    ->header('Access-Control-Allow-Credentials', 'true')
+                    ->header('Access-Control-Allow-Headers', '*');
         } else {
             return response()->json(['error' => 'CORS error'], 404);
         }
-
-
-        // return $next($request)
-        //             ->header('Access-Control-Allow-Origin', '*')
-        //             ->header('Access-Control-Allow-Methods', '*')
-        //             ->header('Access-Control-Allow-Headers', '*')
-        //             ->header('Access-Control-Allow-Credentials', true);
     }
 }
