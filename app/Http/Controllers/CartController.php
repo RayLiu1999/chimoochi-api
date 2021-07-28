@@ -54,8 +54,8 @@ class CartController extends Controller
                 return $this->errorResponse('auth token失效', 401);
             }
             $this->addToDBCart($currentUser, $id, $quantity);
-            return response()->json(['success' => true, 'message' => '加入資料庫購物車成功'])
-                            ->withoutCookie('cart');
+
+            return response()->json(['success' => true, 'message' => '加入資料庫購物車成功']);
         } else {
             $cookieCart = $this->addToCookieCart($request, $id, $quantity);
             return $this->saveCookieCart($cookieCart, '加入購物車成功');
@@ -275,7 +275,7 @@ class CartController extends Controller
     {
         $cartToJson = empty($cookieCart) ? "{}" : json_encode($cookieCart, true);
         return response()->json(['success' => true, 'message' => $message])
-                        ->cookie('cart', $cartToJson, 60 * 24 * 7);
+                        ->cookie('cart', $cartToJson, 60 * 24 * 7, null, null, false, true);
     }
 
     private function errorResponse($message, $status)
