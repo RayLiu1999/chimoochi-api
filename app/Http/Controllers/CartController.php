@@ -275,8 +275,8 @@ class CartController extends Controller
     {
         $cartToJson = empty($cookieCart) ? "{}" : json_encode($cookieCart, true);
         return response()->json(['success' => true, 'message' => $message])
-                        ->cookie('cart', $cartToJson, 60 * 24 * 7, null, null, false, true)
-                        ->cookie('cart', $cartToJson, 60 * 24 * 7, null, null, false, true);
+                        // ->cookie('cart', $cartToJson, 60 * 24 * 7, null, null, false, true)
+                        ->cookie('cart', $cartToJson, 60 * 24 * 7, null, null, true, true);
     }
 
     private function errorResponse($message, $status)
