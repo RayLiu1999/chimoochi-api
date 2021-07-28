@@ -19,16 +19,9 @@ class CORSVerify
         $origin = $request->header('Origin');
         $domain = ['http://127.0.0.1:8000', 'http://localhost:8080', 'https://6yuwei.com', 'https://chimoochi-api.herokuapp.com', 'http://127.0.0.1:8080', 'http://127.0.0.1:5500'];
         $methods = 'PUT, GET, POST, DELETE, PATCH, OPTIONS';
-        $headers = 'Origin, Content-Type, Authorization, X-Custom-Header';
+        $headers = 'Origin, Content-Type, Authorization';
         
         if ($origin && collect($domain)->contains($origin)) {
-            if ($request->getMethod() === "OPTIONS") {
-                return $next($request)
-                        ->header('Access-Control-Allow-Origin', $origin)
-                        ->header('Access-Control-Allow-Methods', $methods)
-                        ->header('Access-Control-Allow-Credentials', 'true')
-                        ->header('Access-Control-Allow-Headers', $headers);
-            }
             return $next($request)
                     ->header('Access-Control-Allow-Origin', $origin)
                     ->header('Access-Control-Allow-Methods', $methods)
