@@ -22,7 +22,7 @@ class CORSVerify
         
         if ($origin && collect($domain)->contains($origin)) {
             return $next($request)
-                    ->header('Access-Control-Allow-Origin', $origin)
+                    ->header('Access-Control-Allow-Origin', 'http://127.0.0.1:5500')
                     ->header('Access-Control-Allow-Methods', $methods)
                     ->header('Access-Control-Allow-Credentials', true)
                     ->header('Access-Control-Allow-Headers', '*');
