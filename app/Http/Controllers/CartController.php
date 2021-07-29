@@ -109,8 +109,6 @@ class CartController extends Controller
         ];
 
         $tradeInfo = $this->create_mpg_aes_encrypt($tradeInfoAry, $hashKey, $hashIV);
-        
-
         $tradeSha = strtoupper(hash("sha256", "HashKey={$hashKey}&{$tradeInfo}&HashIV={$hashIV}"));
         $actionUrl = 'https://ccore.newebpay.com/MPG/mpg_gateway';
 
@@ -279,7 +277,6 @@ class CartController extends Controller
     {
         $cartToJson = empty($cookieCart) ? "{}" : json_encode($cookieCart, true);
         return response()->json(['success' => true, 'message' => $message])
-                        // ->cookie('cart', $cartToJson, 60 * 24 * 7, null, null, false, true)
                         ->cookie('cart', $cartToJson, 60 * 24 * 7, null, null, true, true);
     }
 
