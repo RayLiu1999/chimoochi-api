@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 use App\Models\CartItem;
-use Illuminate\Support\Facades\Cookie;
 
 class AuthController extends Controller
 {

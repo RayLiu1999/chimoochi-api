@@ -102,7 +102,7 @@ class CartController extends Controller
             'CVS' => env('MPG_CVS', ''),
             'BARCODE' => env('MPG_BARCODE', ''),
             //'CVSCOM' => '3',
-            // 'ReturnURL' => env('APP_URL') . env('MPG_ReturnURL', ''),
+            'ReturnURL' => env('APP_URL') . env('MPG_ReturnURL', ''),
             // 'NotifyURL' => env('APP_URL') . env('MPG_NotifyURL', ''),
             // 'CustomerURL' => env('APP_URL') . env('MPG_CustomerURL', ''),
             'ClientBackURL' => env('MPG_ClientBackURL', ''),
