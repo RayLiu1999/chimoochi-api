@@ -40,7 +40,8 @@ class AuthController extends Controller
                 'expires_in' => auth()->factory()->getTTL() * 60,
             ]
         ])
-        ->cookie('refresh_token', $refreshToken, 60 * 24, null, null, true, true);
+        ->cookie('refresh_token', $refreshToken, 60 * 24, null, null, true, true)
+        ->withoutCookie('cart');
     }
 
 

@@ -77,6 +77,7 @@ class CartController extends Controller
             return $this->errorResponse('購物車為空', 400);
         }
         
+        echo(1);
         $hashKey = env('MPG_HashKey', '');
         $hashIV = env('MPG_hashIV', '');
         $expireDaysToPlus = env('MPG_ExpireDate', '');
