@@ -79,7 +79,7 @@ class CartController extends Controller
         
 
         $hashKey = env('MPG_HashKey', '');
-        $hashIV = env('MPG_hashIV', '');
+        $hashIV = env('MPG_HashIV', '');
         $expireDaysToPlus = env('MPG_ExpireDate', '');
         $tradeInfoAry = [
             'MerchantID' => env('MPG_MerchantID', ''),
@@ -108,7 +108,6 @@ class CartController extends Controller
             'ClientBackURL' => env('MPG_ClientBackURL', ''),
         ];
 
-        return response()->json([$hashKey, $hashIV]);
         $tradeInfo = $this->create_mpg_aes_encrypt($tradeInfoAry, $hashKey, $hashIV);
         
 
