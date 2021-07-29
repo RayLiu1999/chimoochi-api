@@ -108,7 +108,7 @@ class CartController extends Controller
             'ClientBackURL' => env('MPG_ClientBackURL', ''),
         ];
 
-        return response()->json($tradeInfoAry);
+        return response()->json([$hashKey, $hashIV]);
         $tradeInfo = $this->create_mpg_aes_encrypt($tradeInfoAry, $hashKey, $hashIV);
         
 
