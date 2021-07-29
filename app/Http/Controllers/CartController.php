@@ -77,7 +77,7 @@ class CartController extends Controller
             return $this->errorResponse('購物車為空', 400);
         }
         
-        return response(1223);
+
         $hashKey = env('MPG_HashKey', '');
         $hashIV = env('MPG_hashIV', '');
         $expireDaysToPlus = env('MPG_ExpireDate', '');
@@ -107,7 +107,7 @@ class CartController extends Controller
             // 'CustomerURL' => env('APP_URL') . env('MPG_CustomerURL', ''),
             'ClientBackURL' => env('MPG_ClientBackURL', ''),
         ];
-
+        return response(1223);
         $tradeInfo = $this->create_mpg_aes_encrypt($tradeInfoAry, $hashKey, $hashIV);
         $tradeSha = strtoupper(hash("sha256", "HashKey={$hashKey}&{$tradeInfo}&HashIV={$hashIV}"));
         $actionUrl = 'https://ccore.newebpay.com/MPG/mpg_gateway';
