@@ -77,7 +77,7 @@ class CartController extends Controller
             return $this->errorResponse('購物車為空', 400);
         }
         
-        echo(1);
+        return response(1223);
         $hashKey = env('MPG_HashKey', '');
         $hashIV = env('MPG_hashIV', '');
         $expireDaysToPlus = env('MPG_ExpireDate', '');
@@ -105,7 +105,7 @@ class CartController extends Controller
             // 'ReturnURL' => env('APP_URL') . env('MPG_ReturnURL', ''),
             // 'NotifyURL' => env('APP_URL') . env('MPG_NotifyURL', ''),
             // 'CustomerURL' => env('APP_URL') . env('MPG_CustomerURL', ''),
-            // 'ClientBackURL' => env('APP_URL') . env('MPG_ClientBackURL', ''),
+            'ClientBackURL' => env('MPG_ClientBackURL', ''),
         ];
 
         $tradeInfo = $this->create_mpg_aes_encrypt($tradeInfoAry, $hashKey, $hashIV);
@@ -313,7 +313,7 @@ class CartController extends Controller
         if ($validator->fails()) {
             return false;
         }
-        
+
         DB::transaction(function () use ($request, $currentUser, $cart, $amount, &$order) {  
             $order = Order::create([
                 'ship_name' => $request->input('user.name'),
