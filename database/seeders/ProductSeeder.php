@@ -302,7 +302,7 @@ class ProductSeeder extends Seeder
 
         Product::create([
             "id" => 23,
-            "category_id" => 2,
+            "category_id" => 6,
             "description" => "皮製經典復古沙發，是由多位大師級的工匠和設計師，經過不容妥協的選材和設計，再經由專家嚴格的多項耐用性和安全性的測試，聯手打造出兼具尊爵的視覺饗宴以及最高等級的使用體驗的產品。",
             "image_url" => "https://storage.googleapis.com/vue-course-api.appspot.com/chimoochi%2F1596809703312.jpg?GoogleAccessId=firebase-adminsdk-zzty7%40vue-course-api.iam.gserviceaccount.com&Expires=1742169600&Signature=VX%2Fga2hlC%2BQLSHOgND4ibJJR7pAxP3osu3JhIDiyO2zO%2FA4U1XhZStX8CSEYJe44%2FDRS%2FqW1BITDsaVEJTMfbdZJk33TM%2FkaWmotizx6hKfcfQDowzs68SmRBBG7raSg7%2Fl7WULvTEuSABWjf13R%2B%2FL0VHWHkQCwddwsv3eKQxqa2oDrWfkW9HweHlRW6nxXMFXQg02vq5swVKh4O9djH1m82wrJkGvYRYiwNR%2FKJ0xYYaXbO6YleBVJrjQub8MBPZszzOGgNF1VMkMH2qBFSECgS9uZXqdWrT3ER986o6u%2F1Uefo4UFHRIz89JCYEmWEUBmZP0GSxfxaWxnnjgG%2FQ%3D%3D",
             "is_enabled" => true,
@@ -312,6 +312,5 @@ class ProductSeeder extends Seeder
             "unit" => "張",
             "quantity" => 9
         ]);
-
     }
 }

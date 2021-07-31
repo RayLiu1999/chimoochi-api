@@ -49,6 +49,3 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth.jwt', 'is_admin']], fu
     Route::patch('orders/{id}', [OrderController::class, 'update']);
     Route::resource('coupons', CouponController::class)->except(['create', 'show', 'edit']);
 });
-
-Route::get('payment', [OrderController::class, 'payment']);
-// Route::get('test', [ProductController::class, 'test']);
