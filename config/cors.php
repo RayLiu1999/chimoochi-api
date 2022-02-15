@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['PUT, GET, POST, DELETE, PATCH, OPTIONS'],
 
-    'allowed_origins' => ['http://127.0.0.1:8000', 'http://localhost:8080', 'https://6yuwei.com', 'https://chimoochi-api.herokuapp.com', 'http://127.0.0.1:8080', 'http://127.0.0.1:5500'],
+    'allowed_origins' => ['http://127.0.0.1:8000', 'http://localhost:8080', 'https://6yuwei.com', 'https://chimoochi-api.herokuapp.com', 'http://127.0.0.1:8080', 'http://127.0.0.1:5500', 'https://liu-yucheng.com'],
 
     'allowed_origins_patterns' => [],
 
