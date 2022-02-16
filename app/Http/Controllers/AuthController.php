@@ -93,6 +93,7 @@ class AuthController extends Controller
 
             return response()->json([
                 'success' => true,
+                'message' => '刷新成功',
                 'data' => [
                     'authToken' => $newAuthToken,
                     'token_type' => 'bearer',
