@@ -29,10 +29,10 @@ class OrderController extends Controller
         }
 
         Order::find($id)->update([
-            'name' => $order['name'],
-            'email' => $order['email'],
-            'tel' => $order['tel'],
-            'address' => $order['address'],
+            'ship_name' => $order['name'],
+            'ship_email' => $order['email'],
+            'ship_phone' => $order['tel'],
+            'ship_address' => $order['address'],
             'ship_message' => $request->message,
         ]);
 
@@ -45,16 +45,16 @@ class OrderController extends Controller
     {
         $order = $request->input('user');
         $validator = Validator::make($request->all(), [
-            'user.name' => ['required', 'email', 'string'],
-            'user.email' => ['required', 'string'],
-            'user.tel' => ['required', 'string'],
-            'user.address' => ['required', 'string', 'max: 50'],
+            'user.name' => ['required', 'string'],
+            'user.email' => ['required', 'email', 'string'],
+            'user.tel' => ['required', 'string', 'min:7'],
+            'user.address' => ['required', 'string'],
             'message' => ['nullable', 'string'],
         ]);
         if ($validator->fails()) {
             return false;
         }
-        return  $order;
+        return $order;
     }
 
     private function messageResponse($boolean, $message, $status = 200)

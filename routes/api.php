@@ -5,6 +5,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CouponController;
+use App\Http\Controllers\APIDocsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 

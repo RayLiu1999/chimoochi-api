@@ -69,10 +69,10 @@ class ProductController extends Controller
 
     public function update(Product $product, Request $request)
     {
-        if ($this->validateRequest($request) === false) {
+        if (!$this->validateRequest($request)) {
             return $this->messageResponse(false, '格式錯誤', 400);
         }
-
+        
         if ($request->hasFile('image')) {
             $file = $request->file('image');
             $path = $request->file('image')->storeAs(
@@ -81,15 +81,14 @@ class ProductController extends Controller
                 'public'
             );
         };
-
         $category_name = $request->input('category');
         $category = Category::where('name', $category_name)->first();
-
+        
         $product->update([
             'name' => $request->input('name'),
             'category_id' => $category->id,
             'image_url' => $request->input('image_url') ?? asset('storage/' . $path),
-            'description' => $request->input('desc'),
+            'description' => $request->input('description'),
             'origin_price' => $request->input('origin_price'),
             'price' => $request->input('price'),
             'unit' => $request->input('unit'),

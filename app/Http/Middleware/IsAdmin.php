@@ -16,7 +16,7 @@ class IsAdmin
      */
     public function handle(Request $request, Closure $next)
     {
-        if ((auth()->user()->is_admin) === (1 || true)) {
+        if ((auth()->user()->is_admin) || (auth()->user()->is_admin) === 1) {
             return $next($request);
         }
         return response()->json(['success' => false, 'message' => '沒有權限'], 401);

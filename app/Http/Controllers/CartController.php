@@ -102,9 +102,10 @@ class CartController extends Controller
             'CVS' => env('MPG_CVS', ''),
             'BARCODE' => env('MPG_BARCODE', ''),
             //'CVSCOM' => '3',
-            'ReturnURL' => env('MPG_ReturnURL', ''),
+            // 'ReturnURL' => env('MPG_ReturnURL', ''),
             // 'NotifyURL' => env('APP_URL') . env('MPG_NotifyURL', ''),
             // 'CustomerURL' => env('APP_URL') . env('MPG_CustomerURL', ''),
+            'NotifyURL' => env('MPG_NotifyURL', ''),
             'ClientBackURL' => env('MPG_ClientBackURL', ''),
         ];
 
@@ -130,7 +131,7 @@ class CartController extends Controller
     {
         $currentUser = auth()->user();
         $code = $request->input('coupon.code');
-        $validator = Validator::make($request->all(), [
+        $validator = Validator::make($request->input('coupon'), [
             'code' => 'required|string',
         ]);
         if ($validator->fails()) {
