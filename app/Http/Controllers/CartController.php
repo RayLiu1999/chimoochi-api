@@ -201,18 +201,19 @@ class CartController extends Controller
         $amount = 0;
 
         $cartItems = $currentUser->getCartOrCreate()->cartItems;
-
-        foreach ($cartItems as $cartItem) {
-            array_push($productIdsAry, $cartItem->product_id);
+        if (isset($cartItems)) {
+            foreach ($cartItems as $cartItem) {
+                array_push($productIdsAry, $cartItem->product_id);
+            }
+            $cartItemsAry = CartItemResource::collection($cartItems->whereIn('product_id', $productIdsAry));
+            
+            $cartItemsAry = json_decode(json_encode($cartItemsAry));
+    
+            foreach ($cartItemsAry as $cartItemAry) {
+                $amount += (($cartItemAry->quantity) * ($cartItemAry->discount_price));
+            }
+            
         }
-        $cartItemsAry = CartItemResource::collection($cartItems->whereIn('product_id', $productIdsAry));
-        
-        $cartItemsAry = json_decode(json_encode($cartItemsAry));
-
-        foreach ($cartItemsAry as $cartItemAry) {
-            $amount += (($cartItemAry->quantity) * ($cartItemAry->discount_price));
-        }
-        
         return array($cartItemsAry, $amount);
     }
 
