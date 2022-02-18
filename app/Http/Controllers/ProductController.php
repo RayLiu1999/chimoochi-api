@@ -121,7 +121,7 @@ class ProductController extends Controller
             'name' => ['required', 'string', 'max:20'],
             'category' => ['required', 'string'],
             'image_url' => ['string', 'max:255', 'min:10'],
-            'image' => ['file'],
+            // 'image' => ['file', 'image'],
             'description' => ['required', 'string', 'max:450'],
             'origin_price' => ['required', 'integer'],
             'price' => ['required', 'integer'],
