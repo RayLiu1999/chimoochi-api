@@ -15,11 +15,10 @@ class AuthController extends Controller
         if ($validator === false) {
             return $this->messageResponse(false, '帳號或密碼格式錯誤', 400);
         }
-
-        if (!$authToken = auth()->attempt($validator->validated())) {
+        if (!$authToken = auth('api')->attempt($validator->validated())) {
             return $this->messageResponse(false, '無效的驗證', 401);
         };
-
+        
         $refreshToken = $this->randomRefreshToken();
 
         $user->where('email', $request->input('user.email'))
@@ -59,7 +58,7 @@ class AuthController extends Controller
         $refreshToken = $this->randomRefreshToken();
         User::create([
                 'email' => $request->input('user.email'),
-                'password' => bcrypt($request->input('user.email')),
+                'password' => bcrypt($request->input('user.password')),
                 'refresh_token' => $refreshToken
             ]);
 
