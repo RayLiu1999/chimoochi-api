@@ -139,6 +139,9 @@ class CartController extends Controller
         }
 
         $coupon = Coupon::where('code', $code)->first();
+        if ($coupon->isEmpty()) {
+            return $this->errorResponse('查無此優惠券', 400);
+        }
         $cartItems = $currentUser->getCartOrCreate()->cartItems;
         foreach ($cartItems as $cartItem) {
             $cartItem->coupon_id = $coupon->id;
