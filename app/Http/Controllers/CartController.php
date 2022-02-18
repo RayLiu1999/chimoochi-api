@@ -139,7 +139,7 @@ class CartController extends Controller
         }
 
         $coupon = Coupon::where('code', $code)->first();
-        if ($coupon) {
+        if (!$coupon) {
             return $this->errorResponse('查無此優惠券', 400);
         }
         $cartItems = $currentUser->getCartOrCreate()->cartItems;
