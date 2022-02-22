@@ -9,8 +9,8 @@
 - Run __php artisan storage:link__
 - That's it: launch the main URL
 
-## [API Test and Documentation](https://liu-yucheng.com/chimoochi-api/api_test.html)
+### [API Test and Documentation](https://liu-yucheng.com/chimoochi-api/api_test.html)
 
-### Customize configuration(
-See [Payment Flow Specification](https://cwww.newebpay.com/website/Page/content/download_api)
-See [Configuration Reference](https://laravel.com/docs/8.x/configuration).
+### Customize configuration
+- See [Payment Flow Specification](https://cwww.newebpay.com/website/Page/content/download_api)
+- See [Configuration Reference](https://laravel.com/docs/8.x/configuration).
