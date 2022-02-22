@@ -1,21 +1,12 @@
 # ChiMooChi-API
 
 ## Build Setup
-```
+
+``` bash
 # install dependencies
 composer install
 
-```
-
-### Compiles and minifies for production
-```
+# serve with hot reload at 127.0.0.1:8000
 php artisan serve
-```
 
-### Lints and fixes files
 ```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
