@@ -1,15 +1,10 @@
 # ChiMooChi-API
 
-## Project setup
+## Build Setup
 ```
+# install dependencies
 composer install
-```
-```
-npm install
-```
-### Compiles and hot-reloads for development
-```
-npm install
+
 ```
 
 ### Compiles and minifies for production
