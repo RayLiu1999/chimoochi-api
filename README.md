@@ -2,11 +2,11 @@
 
 ## Build Setup
 
-## Install dependencies
+### Install dependencies
 ``` 
 composer install
 ```
-## Serve with hot reload at 127.0.0.1:8000
+### Serve with hot reload at 127.0.0.1:8000
 ```
 php artisan serve
 ```
