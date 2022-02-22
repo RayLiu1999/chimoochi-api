@@ -10,7 +10,8 @@
 - That's it: launch the main URL
 
 ### API Test and Documentation
-[DEMO](https://liu-yucheng.com/chimoochi-api/api_test.html)
+- [Test](https://liu-yucheng.com/chimoochi-api/api_test.html)
+- [Documentation](https://documenter.getpostman.com/view/12172411/UVkjuGqS)
 
 ### Customize configuration
 - See [Payment Flow Specification](https://cwww.newebpay.com/website/Page/content/download_api)
