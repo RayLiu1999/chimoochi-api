@@ -1,15 +1,16 @@
 # ChiMooChi-API
 
-## Build Setup
+## How to use
 
-### Install dependencies
-``` 
-composer install
-```
-### Serve with hot reload at 127.0.0.1:8000
-```
-php artisan serve
-```
+- Clone the repository with __git clone__
+- Copy __.env.example__ file to __.env__ and edit database credentials there
+- Run __composer install__
+- Run __php artisan migrate --seed__ (it has some seeded data for your testing)
+- Run __php artisan storage:link__
+- That's it: launch the main URL
 
-### Customize configuration
+## [API Test and Documentation](https://liu-yucheng.com/chimoochi-api/api_test.html)
+
+### Customize configuration(
+See [Payment Flow Specification](https://cwww.newebpay.com/website/Page/content/download_api)
 See [Configuration Reference](https://laravel.com/docs/8.x/configuration).
