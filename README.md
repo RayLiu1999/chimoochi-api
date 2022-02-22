@@ -15,4 +15,4 @@
 
 ### Customize configuration
 - See [Payment Flow Specification](https://cwww.newebpay.com/website/Page/content/download_api)
-- See [Configuration Reference](https://laravel.com/docs/8.x/configuration).
+- See [Configuration Reference](https://laravel.com/docs/8.x/configuration)
