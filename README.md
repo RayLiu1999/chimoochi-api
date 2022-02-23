@@ -1,5 +1,5 @@
 # ChiMooChi-API
-
+> This is a side project about E-commerce API 
 ## How to use
 
 - Clone the repository with __git clone__
