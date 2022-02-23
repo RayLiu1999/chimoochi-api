@@ -1,7 +1,7 @@
 # ChiMooChi-API
 > This is a side project about E-commerce API 
 
-### API Test and Documentation
+## API Test and Documentation
 - [Test](https://liu-yucheng.com/chimoochi-api/api_test.html)
 - [Documentation](https://documenter.getpostman.com/view/12172411/UVkjuGqS)
 
