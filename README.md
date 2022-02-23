@@ -1,5 +1,10 @@
 # ChiMooChi-API
 > This is a side project about E-commerce API 
+
+### API Test and Documentation
+- [Test](https://liu-yucheng.com/chimoochi-api/api_test.html)
+- [Documentation](https://documenter.getpostman.com/view/12172411/UVkjuGqS)
+
 ## How to use
 
 - Clone the repository with __git clone__
@@ -8,10 +13,6 @@
 - Run __php artisan migrate --seed__ (it has some seeded data for your testing)
 - Run __php artisan storage:link__
 - That's it: launch the main URL
-
-### API Test and Documentation
-- [Test](https://liu-yucheng.com/chimoochi-api/api_test.html)
-- [Documentation](https://documenter.getpostman.com/view/12172411/UVkjuGqS)
 
 ### Customize configuration
 - See [Payment Flow Specification](https://cwww.newebpay.com/website/Page/content/download_api)
